@@ -151,41 +151,6 @@ body {
   color: #fff;
   margin-bottom: 25px;
   font-size: 2rem;
-}
-
-/* Input container */
-.input-container {
-  margin-bottom: 25px;
-}
-
-/* Input field styling */
-.input-field {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-  background-color: rgba(255, 255, 255, 0.8);
-  color: #333;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.input-field:focus {
-  background-color: #fff;
-  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-}
-
-/* Login button styling */
-.login-btn {
-  width: 100%;
-  padding: 15px;
-  background-image: linear-gradient(to right, #ff9966, #ff5e62);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  font-weight: bold;
 
 Home.js
 
