@@ -252,6 +252,53 @@ function Home() {
 
 export default Home;
 
+Home.css
+/* Home.css */
+
+.home-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+  color: #333;
+  font-family: 'Arial', sans-serif;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: #2a2a2a;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+nav {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+nav a {
+  text-decoration: none;
+  color: #ffffff;
+  background-color: #007bff;
+  padding: 15px 25px;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+nav a:hover {
+  background-color: #0056b3;
+  transform: scale(1.05);
+}
+
+nav a:active {
+  background-color: #004080;
+}
+
 Profile.js
 
 import React, { useEffect, useState } from 'react';
