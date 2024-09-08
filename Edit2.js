@@ -114,14 +114,26 @@ function Login() {
 export default Login;
 
 Login.css
-/* Full-page gradient background */
+/* Full-page background with a financial theme */
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Poppins', sans-serif; /* Modern font */
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  font-family: 'Poppins', sans-serif;
+  background: url('https://images.unsplash.com/photo-1565372914780-465ccdc5d29a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDF8fG1vbmV5fGVufDB8fHx8MTY5Nzc0MjEyOA&ixlib=rb-1.2.1&q=80&w=1080') no-repeat center center fixed;
   background-size: cover;
-  color: #fff;
+  position: relative;
+  height: 100vh;
+}
+
+/* Dark overlay on top of background */
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6); /* Darkens the background for better contrast */
+  z-index: -1;
 }
 
 /* Main login container */
@@ -130,27 +142,93 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5); /* Dark overlay to enhance contrast */
+  color: white;
+  position: relative;
 }
 
-/* Login box styling */
+/* Login box with smooth, colorful gradients */
 .login-box {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  background: linear-gradient(145deg, #1a73e8, #34a853);
   padding: 40px;
   border-radius: 15px;
-  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.3);
   text-align: center;
   max-width: 400px;
   width: 100%;
-  color: white;
-  font-family: 'Poppins', sans-serif;
+  position: relative;
+  z-index: 1;
 }
 
-/* Heading */
+/* Heading and description */
 .login-box h2 {
-  color: #fff;
-  margin-bottom: 25px;
-  font-size: 2rem;
+  color: white;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.login-box p {
+  color: #d1f4ff;
+  margin-bottom: 30px;
+  font-size: 1.2rem;
+}
+
+/* Input container styling */
+.input-container {
+  margin-bottom: 20px;
+}
+
+/* Input fields */
+.input-field {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  outline: none;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-field:focus {
+  background-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* Stylish login button */
+.login-btn {
+  width: 100%;
+  padding: 15px;
+  background-color: #34a853;
+  background-image: linear-gradient(to right, #34a853, #1a73e8);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.4s ease, transform 0.2s ease;
+}
+
+.login-btn:hover {
+  background-color: #0b63ce;
+  transform: translateY(-3px);
+}
+
+/* Signup text */
+.signup-text {
+  margin-top: 20px;
+  color: #d1f4ff;
+  cursor: pointer;
+}
+
+.signup-text:hover {
+  text-decoration: underline;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .
 
 Home.js
 
