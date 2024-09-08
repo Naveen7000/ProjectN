@@ -233,19 +233,47 @@ body {
 Home.js
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 import './Home.css';
 
 function Home() {
+  const user = {
+    name: 'John Doe',
+    email: 'johndoe@example.com',
+    balance: '$5,000',
+  };
+
   return (
     <div className="home-container">
-      <h1>Welcome to Money Transfer App</h1>
-      <nav>
-        <Link to="/profile">Profile</Link>
-        <Link to="/transfer">Transfer Money</Link>
-        <Link to="/tracking">Money Tracking</Link>
-        <Link to="/reports">Reports</Link>
-      </nav>
+      {/* User Profile Section */}
+      <div className="profile-container">
+        <h2>Welcome, {user.name}</h2>
+        <p>Email: {user.email}</p>
+        <p>Account Balance: {user.balance}</p>
+      </div>
+
+      {/* Main Actions: Money Transfer, Money Tracking, Reports */}
+      <div className="actions-container">
+        {/* Money Transfer Section */}
+        <div className="action-box transfer-box">
+          <h3>Money Transfer</h3>
+          <p>Send money securely to other accounts</p>
+          <button className="action-btn">Transfer Now</button>
+        </div>
+
+        {/* Money Tracking Section */}
+        <div className="action-box tracking-box">
+          <h3>Money Tracking</h3>
+          <p>Track all your recent transactions</p>
+          <button className="action-btn">View Transactions</button>
+        </div>
+
+        {/* Reports Section */}
+        <div className="action-box reports-box">
+          <h3>Reports</h3>
+          <p>View detailed financial reports</p>
+          <button className="action-btn">Generate Reports</button>
+        </div>
+      </div>
     </div>
   );
 }
@@ -297,6 +325,104 @@ nav a:hover {
 
 nav a:active {
   background-color: #004080;
+/* Home page container */
+.home-container {
+  padding: 40px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Profile section styling */
+.profile-container {
+  background-color: #1a73e8;
+  color: white;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 40px;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.profile-container h2 {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.profile-container p {
+  font-size: 1.2rem;
+}
+
+/* Actions container for money transfer, tracking, and reports */
+.actions-container {
+  display: flex;
+  justify-content: space-around;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+/* Individual action boxes */
+.action-box {
+  background-color: white;
+  border-radius: 15px;
+  padding: 30px;
+  flex: 1;
+  text-align: center;
+  box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.action-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Heading for each action */
+.action-box h3 {
+  font-size: 1.8rem;
+  margin-bottom: 15px;
+  color: #1a73e8;
+}
+
+/* Description text */
+.action-box p {
+  font-size: 1.1rem;
+  margin-bottom: 25px;
+  color: #555;
+}
+
+/* Action button */
+.action-btn {
+  background-color: #34a853;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.action-btn:hover {
+  background-color: #0b63ce;
+  transform: translateY(-3px);
+}
+
+/* Responsive layout for smaller screens */
+@media (max-width: 768px) {
+  .actions-container {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .action-box {
+    margin-bottom: 20px;
+  }
 }
 
 Profile.js
