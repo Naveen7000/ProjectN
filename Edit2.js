@@ -110,7 +110,106 @@ function Login() {
 export default Login;
 
 Login.css
+/* Full-page gradient background */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif; /* Modern font */
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  background-size: cover;
+  color: #fff;
+}
 
+/* Main login container */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); /* Dark overlay to enhance contrast */
+}
+
+/* Login box styling */
+.login-box {
+  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.4);
+  text-align: center;
+  max-width: 400px;
+  width: 100%;
+  color: white;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* Heading */
+.login-box h2 {
+  color: #fff;
+  margin-bottom: 25px;
+  font-size: 2rem;
+}
+
+/* Input container */
+.input-container {
+  margin-bottom: 25px;
+}
+
+/* Input field styling */
+.input-field {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.8);
+  color: #333;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input-field:focus {
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Login button styling */
+.login-btn {
+  width: 100%;
+  padding: 15px;
+  background-image: linear-gradient(to right, #ff9966, #ff5e62);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.login-btn:hover {
+  background-image: linear-gradient(to right, #ff5e62, #ff9966);
+  transform: scale(1.05);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .login-box {
+    padding: 20px;
+  }
+
+  .login-box h2 {
+    font-size: 1.8rem;
+  }
+
+  .input-field {
+    font-size: 1rem;
+  }
+
+  .login-btn {
+    font-size: 1rem;
+    padding: 12px;
+  }
+    }
 
 Home.js
 
