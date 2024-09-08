@@ -63,7 +63,7 @@ Login.js
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Login.css';
+import './Login.css'; // Importing CSS for styling
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -71,37 +71,46 @@ function Login() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    // You can add authentication logic here
+    // Basic validation (can be extended with proper authentication)
     if (email && password) {
       navigate('/home'); // Redirect to home page after login
+    } else {
+      alert('Please fill in both fields');
     }
   };
 
   return (
     <div className="login-container">
-      <h2>Login</h2>
-      <div>
-        <input
-          type="text"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+      <div className="login-box">
+        <h2>Login</h2>
+        <div className="input-container">
+          <input
+            type="text"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input-field"
+          />
+        </div>
+        <div className="input-container">
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="input-field"
+          />
+        </div>
+        <button onClick={handleLogin} className="login-btn">Login</button>
       </div>
-      <div>
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-      </div>
-      <button onClick={handleLogin}>Login</button>
     </div>
   );
 }
 
 export default Login;
+
+Login.css
+
 
 
 Home.js
