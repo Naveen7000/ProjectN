@@ -63,7 +63,7 @@ Login.js
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Login.css'; // Importing CSS for styling
+import './Login.css'; // Updated CSS for the modern design
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -71,22 +71,23 @@ function Login() {
   const navigate = useNavigate();
 
   const handleLogin = () => {
-    // Basic validation (can be extended with proper authentication)
     if (email && password) {
-      navigate('/home'); // Redirect to home page after login
+      navigate('/home');
     } else {
-      alert('Please fill in both fields');
+      alert('Please enter your email and password.');
     }
   };
 
   return (
     <div className="login-container">
+      <div className="overlay"></div>
       <div className="login-box">
-        <h2>Login</h2>
+        <h2>Welcome to MoneyFlow</h2>
+        <p>Transfer money securely and easily</p>
         <div className="input-container">
           <input
-            type="text"
-            placeholder="Email"
+            type="email"
+            placeholder="Enter your email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="input-field"
@@ -95,13 +96,16 @@ function Login() {
         <div className="input-container">
           <input
             type="password"
-            placeholder="Password"
+            placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="input-field"
           />
         </div>
-        <button onClick={handleLogin} className="login-btn">Login</button>
+        <button onClick={handleLogin} className="login-btn">
+          Login
+        </button>
+        <p className="signup-text">Don't have an account? Sign up here.</p>
       </div>
     </div>
   );
@@ -182,34 +186,6 @@ body {
   border-radius: 8px;
   font-size: 1.1rem;
   font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.login-btn:hover {
-  background-image: linear-gradient(to right, #ff5e62, #ff9966);
-  transform: scale(1.05);
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .login-box {
-    padding: 20px;
-  }
-
-  .login-box h2 {
-    font-size: 1.8rem;
-  }
-
-  .input-field {
-    font-size: 1rem;
-  }
-
-  .login-btn {
-    font-size: 1rem;
-    padding: 12px;
-  }
-    }
 
 Home.js
 
