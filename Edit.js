@@ -144,3 +144,21 @@ function Transfer() {
 
 export default Transfer;
 
+import axios from 'axios';
+
+const API = axios.create({ baseURL: 'http://localhost:8080/api' });
+
+API.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export const login = (email, password) => API.post('/auth/login', { email, password });
+export const register = (name, email, password) => API.post('/auth/register', { name, email, password });
+export const getBalance = () => API.get('/user/balance');
+export const transferMoney = (recipient, amount) => API.post('/transfer', { recipient, amount });
+                                                  
+
