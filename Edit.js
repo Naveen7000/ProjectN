@@ -160,5 +160,193 @@ export const login = (email, password) => API.post('/auth/login', { email, passw
 export const register = (name, email, password) => API.post('/auth/register', { name, email, password });
 export const getBalance = () => API.get('/user/balance');
 export const transferMoney = (recipient, amount) => API.post('/transfer', { recipient, amount });
-                                                  
 
+
+
+
+Back-end 
+
+1. package com.example.moneytransfer;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class MoneyTransferApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(MoneyTransferApplication.class, args);
+    }
+}
+
+2.package com.example.moneytransfer.model;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "users")
+public class User {
+    @Id
+    private String id;
+    private String email;
+    private String password;
+
+    // Constructors, Getters, and Setters
+  }
+
+3.package com.example.moneytransfer.repository;
+
+import com.example.moneytransfer.model.User;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface UserRepository extends MongoRepository<User, String> {
+    Optional<User> findByEmail(String email);
+}
+
+4.package com.example.moneytransfer.service;
+
+import com.example.moneytransfer.model.User;
+import com.example.moneytransfer.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class AuthService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public boolean authenticate(String email, String password) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            return passwordEncoder.matches(password, user.getPassword());
+        }
+        return false;
+    }
+
+    public void registerUser(String email, String password) {
+        String encodedPassword = passwordEncoder.encode(password);
+        User user = new User(email, encodedPassword);
+        userRepository.save(user);
+    }
+}
+
+
+5.package com.example.moneytransfer.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+@Configuration
+public class PasswordConfig {
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+      }
+
+6.package com.example.moneytransfer.controller;
+
+import com.example.moneytransfer.service.AuthService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/auth")
+public class AuthController {
+
+    @Autowired
+    private AuthService authService;
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestParam String email, @RequestParam String password) {
+        boolean authenticated = authService.authenticate(email, password);
+        if (authenticated) {
+            return ResponseEntity.ok("Login successful");
+        } else {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
+    }
+
+    @PostMapping("/register")
+    public ResponseEntity<String> register(@RequestParam String email, @RequestParam String password) {
+        authService.registerUser(email, password);
+        return ResponseEntity.ok("User registered successfully");
+    }
+                                       }
+7. 
+spring.data.mongodb.uri=mongodb://localhost:27017/moneytransferdb
+server.port=8080
+
+8.
+  
+plugins {
+    id 'org.springframework.boot' version '3.1.1'
+    id 'io.spring.dependency-management' version '1.1.0'
+    id 'java'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.security:spring
+    implementation 'org.springframework.security:spring-security-crypto'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+9.
+
+money-transfer-app/
+├── build.gradle
+├── src
+│   ├── main
+│   │   ├── java
+│   │   │   └── com
+│   │   │       └── example
+│   │   │           └── moneytransfer
+│   │   │               ├── MoneyTransferApplication.java  # Main Spring Boot Application
+│   │   │               ├── model
+│   │   │               │   └── User.java                  # User Model for MongoDB
+│   │   │               ├── repository
+│   │   │               │   └── UserRepository.java        # MongoDB Repository for Users
+│   │   │               ├── service
+│   │   │               │   └── AuthService.java           # Business Logic for Authentication
+│   │   │               ├── controller
+│   │   │               │   └── AuthController.java        # API Controller for Login/Register
+│   │   │               └── security
+│   │   │                   └── PasswordConfig.java        # Password Encryption Config
+│   │   └── resources
+│   │       └── application.properties                     # Application Configuration
+│   └── test
+│       └── java
+│           └── com
+│               └── example
+│                   └── moneytransfer
+│                       └── MoneyTransferApplicationTests.java # Test Cases
