@@ -350,3 +350,66 @@ money-transfer-app/
 │               └── example
 │                   └── moneytransfer
 │                       └── MoneyTransferApplicationTests.java # Test Cases
+
+
+
+package com.example.moneytransfer.model;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "users") // This annotation marks the class as a MongoDB document
+public class User {
+    
+    @Id // This annotation marks the id field as the unique identifier
+    private String id;
+    
+    private String email;
+    private String password;
+
+    // Default Constructor
+    public User() {
+    }
+
+    // Parameterized Constructor
+    public User(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
+
+    // Getters and Setters
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    // ToString method to output the user info in a readable format
+    @Override
+    public String toString() {
+        return "User{" +
+                "id='" + id + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                '}';
+    }
+}
