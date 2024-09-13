@@ -536,4 +536,131 @@ The data is accessed and manipulated using MongoRepository in Spring Data MongoD
 
 Let me know if you need any additional clarification or changes!
 
+
+To generate a human-readable, alphanumeric, and fixed-length ID, we can modify the code to use a custom logic. Here’s a way to create a fixed-length alphanumeric ID using Java's Random class, or alternatively using UUID in a truncated and readable format.
+
+Updated Approach for ID Generation:
+
+The userId will now be a combination of uppercase letters and numbers.
+
+The length of the userId will be fixed, e.g., 8 characters.
+
+
+Here's how to achieve this:
+
+Service Layer Update
+
+1. UserService.java
+
+Modify the logic for generating the user ID and account number to be more human-readable and of fixed length.
+
+package com.example.moneytransfer.service;
+
+import com.example.moneytransfer.model.UserTransaction;
+import com.example.moneytransfer.model.User;
+import com.example.moneytransfer.repository.UserRepository;
+import com.example.moneytransfer.repository.TransactionRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.security.SecureRandom;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    // SecureRandom for generating random alphanumeric strings
+    private static final String ALPHANUMERIC = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    private static final SecureRandom RANDOM = new SecureRandom();
+    private static final int USER_ID_LENGTH = 8;
+    private static final int ACCOUNT_NUMBER_LENGTH = 10;
+    private static final String IFSC_PREFIX = "IFSC";
+
+    // Method to generate random alphanumeric string for ID
+    private String generateRandomAlphanumeric(int length) {
+        StringBuilder builder = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            builder.append(ALPHANUMERIC.charAt(RANDOM.nextInt(ALPHANUMERIC.length())));
+        }
+        return builder.toString();
+    }
+
+    // Register a new user
+    public UserTransaction registerUser(String firstName, String lastName, String email, String password) {
+        // Generate human-readable, fixed-length alphanumeric userId and account number
+        String userId = generateRandomAlphanumeric(USER_ID_LENGTH);
+        String accountNumber = "AC" + generateRandomAlphanumeric(ACCOUNT_NUMBER_LENGTH);
+        String ifscCode = IFSC_PREFIX + generateRandomAlphanumeric(4); // Fixed length IFSC with prefix
+
+        // Hash the password
+        String hashedPassword = passwordEncoder.encode(password);
+
+        // Save user credentials in usersN collection
+        User user = new User(userId, hashedPassword);
+        userRepository.save(user);
+
+        // Save transaction details in transactions collection
+        UserTransaction userTransaction = new UserTransaction(userId, accountNumber, ifscCode, firstName, lastName, email, 0.0);
+        transactionRepository.save(userTransaction);
+
+        return userTransaction;
+    }
+
+    // Authenticate user by checking userId and password
+    public boolean authenticateUser(String userId, String password) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user != null) {
+            return passwordEncoder.matches(password, user.getPassword());
+        }
+        return false;
+    }
+}
+
+Explanation:
+
+generateRandomAlphanumeric(int length): This function generates a random alphanumeric string of the given length. The characters are drawn from the string ALPHANUMERIC, which consists of uppercase letters and numbers.
+
+Fixed-Length:
+
+userId is a random 8-character alphanumeric string.
+
+accountNumber is a random 10-character alphanumeric string prefixed with "AC".
+
+ifscCode has a fixed prefix (IFSC) and is followed by a 4-character random alphanumeric string.
+
+
+
+
+---
+
+Example Output:
+
+userId: A7ZB12PQ (8 characters, alphanumeric)
+
+accountNumber: ACX7V92RT5 (10 characters with AC prefix)
+
+ifscCode: IFSCA12B (IFSC prefix followed by 4 random characters)
+
+
+With this approach, your IDs will be both human-readable and consistent in length.
+
+How to Test:
+
+During registration, the generated userId, accountNumber, and ifscCode will be included in the response to the user and saved in the database.
+
+You can easily verify the generated values by checking the database or the response object from the API.
+
+
+Would you like to proceed with this, or would you like to modify anything else?
+
+
+
   
