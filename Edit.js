@@ -411,5 +411,143 @@ public class User {
                 ", email='" + email + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+
+
+      Money transfer 
+
+      User.java
+      package com.example.moneytransfer.model;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "users")
+public class User {
+    @Id
+    private String id;
+    private String email;
+    private String password;
+    private String accountNumber;
+    private String ifscCode;
+    private double balance;
+
+    // Constructors, Getters, and Setters
+    public User(String email, String password, String accountNumber, String ifscCode, double balance) {
+        this.email = email;
+        this.password = password;
+        this.accountNumber = accountNumber;
+        this.ifscCode = ifscCode;
+        this.balance = balance;
+    }
+
+    // Getters and setters for all fields
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
+    }
+
+    public String getIfscCode() {
+        return ifscCode;
+    }
+
+    public void setIfscCode(String ifscCode) {
+        this.ifscCode = ifscCode;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 }
+
+      
+    }
+}
+
+
+
+Transfer service 
+package com.example.moneytransfer.service;
+
+import com.example.moneytransfer.model.User;
+import com.example.moneytransfer.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class TransferService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public String transferMoney(String senderAccountNumber, String senderIFSC, String receiverAccountNumber, String receiverIFSC, double amount) {
+        // Find sender and receiver in the database
+        User sender = userRepository.findByAccountNumberAndIfscCode(senderAccountNumber, senderIFSC)
+                .orElseThrow(() -> new RuntimeException("Sender account not found or IFSC code mismatch"));
+
+        User receiver = userRepository.findByAccountNumberAndIfscCode(receiverAccountNumber, receiverIFSC)
+                .orElseThrow(() -> new RuntimeException("Receiver account not found or IFSC code mismatch"));
+
+        // Check if sender has enough balance
+        if (sender.getBalance() < amount) {
+            return "Insufficient funds!";
+        }
+
+        // Transfer the amount
+        sender.setBalance(sender.getBalance() - amount);
+        receiver.setBalance(receiver.getBalance() + amount);
+
+        // Save the updated sender and receiver back to the database
+        userRepository.save(sender);
+        userRepository.save(receiver);
+
+        return "Transfer successful!";
+    }
+}
+Trans control 
+package com.example.moneytransfer.controller;
+
+import com.example.moneytransfer.service.TransferService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/transfer")
+public class TransferController {
+
+    @Autowired
+    private TransferService transferService;
+
+    @PostMapping
+    public ResponseEntity<?> transferMoney(
+            @RequestParam String senderAccountNumber,
+            @RequestParam String senderIFSC,
+            @RequestParam String receiverAccountNumber,
+            @RequestParam String receiverIFSC,
+            @RequestParam double amount
+    ) {
+        String result = transferService.transferMoney(senderAccountNumber, senderIFSC, receiverAccountNumber, receiverIFSC, amount);
+        return ResponseEntity.ok().body("{\"message\": \"" + result + "\"}");
+    }
+}
+User repo
+
+package com.example.moneytransfer.repository;
+
+import com.example.moneytransfer.model.User;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+import java.util.Optional;
+
+public interface UserRepository extends MongoRepository<User, String> {
+    Optional<User> findByAccountNumberAndIfscCode(String accountNumber, String ifscCode);
+  }
+
+  
