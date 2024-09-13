@@ -413,72 +413,76 @@ public class User {
                 '}';
 
 
-      Money transfer 
 
-      User.java
-      package com.example.moneytransfer.model;
+
+  Money Transfer 
+
+  1.package com.example.moneytransfer.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import java.time.LocalDateTime;
 
-@Document(collection = "users")
-public class User {
+@Document(collection = "transfers")
+public class Transfer {
     @Id
     private String id;
-    private String email;
-    private String password;
-    private String accountNumber;
-    private String ifscCode;
-    private double balance;
+    private String senderId;
+    private String receiverId;
+    private double amount;
+    private LocalDateTime timestamp;
 
     // Constructors, Getters, and Setters
-    public User(String email, String password, String accountNumber, String ifscCode, double balance) {
-        this.email = email;
-        this.password = password;
-        this.accountNumber = accountNumber;
-        this.ifscCode = ifscCode;
-        this.balance = balance;
+    public Transfer(String senderId, String receiverId, double amount, LocalDateTime timestamp) {
+        this.senderId = senderId;
+        this.receiverId = receiverId;
+        this.amount = amount;
+        this.timestamp = timestamp;
     }
 
-    // Getters and setters for all fields
-    public String getAccountNumber() {
-        return accountNumber;
+    public String getSenderId() {
+        return senderId;
     }
 
-    public void setAccountNumber(String accountNumber) {
-        this.accountNumber = accountNumber;
+    public void setSenderId(String senderId) {
+        this.senderId = senderId;
     }
 
-    public String getIfscCode() {
-        return ifscCode;
+    public String getReceiverId() {
+        return receiverId;
     }
 
-    public void setIfscCode(String ifscCode) {
-        this.ifscCode = ifscCode;
+    public void setReceiverId(String receiverId) {
+        this.receiverId = receiverId;
     }
 
-    public double getBalance() {
-        return balance;
+    public double getAmount() {
+        return amount;
     }
 
-    public void setBalance(double balance) {
-        this.balance = balance;
+    public void setAmount(double amount) {
+        this.amount = amount;
     }
-}
 
-      
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
-}
 
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+  }
 
+      2.package com.example.moneytransfer.service;
 
-Transfer service 
-package com.example.moneytransfer.service;
-
+import com.example.moneytransfer.model.Transfer;
 import com.example.moneytransfer.model.User;
+import com.example.moneytransfer.repository.TransferRepository;
 import com.example.moneytransfer.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 @Service
 public class TransferService {
@@ -486,8 +490,11 @@ public class TransferService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private TransferRepository transferRepository;
+
     public String transferMoney(String senderAccountNumber, String senderIFSC, String receiverAccountNumber, String receiverIFSC, double amount) {
-        // Find sender and receiver in the database
+        // Find sender and receiver by account number and IFSC code
         User sender = userRepository.findByAccountNumberAndIfscCode(senderAccountNumber, senderIFSC)
                 .orElseThrow(() -> new RuntimeException("Sender account not found or IFSC code mismatch"));
 
@@ -499,19 +506,36 @@ public class TransferService {
             return "Insufficient funds!";
         }
 
-        // Transfer the amount
+        // Transfer the amount: deduct from sender, add to receiver
         sender.setBalance(sender.getBalance() - amount);
         receiver.setBalance(receiver.getBalance() + amount);
 
-        // Save the updated sender and receiver back to the database
+        // Save updated balances for sender and receiver
         userRepository.save(sender);
         userRepository.save(receiver);
 
+        // Save the transfer record in the transfers collection
+        Transfer transfer = new Transfer(
+                sender.getId(),
+                receiver.getId(),
+                amount,
+                LocalDateTime.now()
+        );
+        transferRepository.save(transfer);
+
         return "Transfer successful!";
     }
+  }
+
+      3.package com.example.moneytransfer.repository;
+
+import com.example.moneytransfer.model.Transfer;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+public interface TransferRepository extends MongoRepository<Transfer, String> {
 }
-Trans control 
-package com.example.moneytransfer.controller;
+
+  4.package com.example.moneytransfer.controller;
 
 import com.example.moneytransfer.service.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -537,17 +561,5 @@ public class TransferController {
         return ResponseEntity.ok().body("{\"message\": \"" + result + "\"}");
     }
 }
-User repo
-
-package com.example.moneytransfer.repository;
-
-import com.example.moneytransfer.model.User;
-import org.springframework.data.mongodb.repository.MongoRepository;
-
-import java.util.Optional;
-
-public interface UserRepository extends MongoRepository<User, String> {
-    Optional<User> findByAccountNumberAndIfscCode(String accountNumber, String ifscCode);
-  }
 
   
