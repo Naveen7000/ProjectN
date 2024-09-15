@@ -71,4 +71,55 @@ function Login() {
 }
 
 export default Login;
+
+
+Home.js
+import React, { useEffect, useState } from 'react';
+import './Home.css';
+import { useNavigate } from 'react-router-dom';
+
+function Home() {
+  const [user, setUser] = useState({
+    name: '',
+    email: '',
+    balance: '',
+  });
+
+  const userID = '12345'; // Assume this is the logged-in user's ID
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await fetch(`http://your-backend-url/api/users?userId=${userID}`); // Pass userID in query string
+        const data = await response.json();
+
+        setUser({
+          name: data.name,
+          email: data.email,
+          balance: data.balance,
+        });
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+
+    fetchUserDetails();
+  }, [userID]);
+
+  return (
+    <div className="home-container">
+      <div className="profile-container">
+        <h2>Welcome, {user.name}</h2>
+        <p>Email: {user.email}</p>
+        <p>Account Balance: {user.balance}</p>
+      </div>
+
+      <button onClick={() => navigate('/another-page')}>Go to another page</button>
+    </div>
+  );
+}
+
+export default Home;
+
               
