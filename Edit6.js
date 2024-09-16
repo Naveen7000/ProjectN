@@ -122,4 +122,99 @@ function Home() {
 
 export default Home;
 
+
+
+import React, { useEffect, useState } from 'react';
+import './Home.css';
+import { useNavigate } from 'react-router-dom';
+
+function Home() {
+  // Initialize user state
+  const [user, setUser] = useState({
+    name: '',
+    email: '',
+    balance: '',
+  });
+
+  // User details (assumed to be sent in the request)
+  const firstName = 'Ram';
+  const lastName = 'Krishna';
+  const email = 'Ram@example.com';
+  const password = 'ram123';
+  const userID = '12345'; // Example userID
+
+  const navigate = useNavigate();
+
+  // Fetch user details with POST request when the page loads
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/user/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            userId: userID,
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            password: password,
+          }),
+        });
+
+        // If the response is successful, parse the JSON data
+        if (response.ok) {
+          const data = await response.json();
+          setUser({
+            name: data.name, // Assuming the API returns the name
+            email: data.email, // Assuming the API returns the email
+            balance: data.balance, // Assuming the API returns the balance
+          });
+        } else {
+          console.error('Failed to fetch user details:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching user details:', error);
+      }
+    };
+
+    // Call the function to fetch user details
+    fetchUserDetails();
+  }, [firstName, lastName, email, password, userID]); // Dependencies array
+
+  return (
+    <div className="home-container">
+      {/* User Profile Section */}
+      <div className="profile-container">
+        <h2>Welcome, {user.name}</h2>
+        <p>Email: {user.email}</p>
+        <p>Account Balance: {user.balance}</p>
+      </div>
+
+      {/* Main Actions: Money Transfer, Money Tracking, Reports */}
+      <div className="actions-container">
+        {/* Money Transfer Section */}
+        <div className="action-box transfer-box">
+          <h3>Money Transfer</h3>
+          <p>Send money securely to other accounts</p>
+          <button className="action-btn" onClick={() => navigate('/transfer')}>
+            Transfer Now
+          </button>
+        </div>
+
+        {/* Money Tracking Section */}
+        <div className="action-box tracking-box">
+          <h3>Accounts</h3>
+          <p>Track all your recent transactions</p>
+          <button className="action-btn" onClick={() => navigate('/tracking')}>
+            Track Now
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default Home;
               
