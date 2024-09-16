@@ -809,4 +809,272 @@ If the transfer fails due to "Insufficient balance" or "Sender or receiver is no
 This design ensures that users can clearly understand the result of their actions in the app, whether the transaction succeeds or fails, with proper visual feedback.
 
   
-            
+
+
+
+
+#-#-#-#-#-#-#--#-#-#-#-#-#--#-#-#-#-#-#-#-#--#-#-#-#-#-#-#-#-#--#-#
+  Thank you for providing the response structure. Based on this, I will create a complete solution that handles:
+
+1. Pagination: As the response includes pageNumber, totalPages, and totalElements.
+
+
+2. Transactions Display: I'll present the transactions in a list.
+
+
+3. Handling Missing Data: Since some fields like senderAccountNumber may be null, we will handle that gracefully.
+
+
+4. Good UI: I'll enhance the UI to display the transaction data attractively.
+
+
+
+Here's the step-by-step implementation:
+
+Step 1: Transaction History Component
+
+This component will handle fetching the transactions, handling pagination, and displaying the transactions.
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './TransactionHistory.css'; // CSS for styling
+
+function TransactionHistory({ userPin }) {
+  const [transactions, setTransactions] = useState([]);
+  const [pageNumber, setPageNumber] = useState(0); // Current page number
+  const [totalPages, setTotalPages] = useState(0); // Total pages
+  const [errorMessage, setErrorMessage] = useState('');
+
+  useEffect(() => {
+    // Fetch the transaction history using the userPin and current page
+    const fetchTransactions = async () => {
+      try {
+        const response = await axios.get(`/api/transactions`, {
+          params: { userPin: userPin, page: pageNumber, size: 10 },
+        });
+        
+        const data = response.data;
+        setTransactions(data.content);
+        setTotalPages(data.totalPages);
+      } catch (error) {
+        setErrorMessage('Failed to fetch transactions. Please try again later.');
+        console.error(error);
+      }
+    };
+
+    fetchTransactions();
+  }, [userPin, pageNumber]);
+
+  const handleNextPage = () => {
+    if (pageNumber < totalPages - 1) {
+      setPageNumber(pageNumber + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (pageNumber > 0) {
+      setPageNumber(pageNumber - 1);
+    }
+  };
+
+  return (
+    <div className="transaction-history-container">
+      <h2>Recent Transactions</h2>
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
+
+      {transactions.length > 0 ? (
+        <>
+          <div className="transaction-list">
+            {transactions.map((transaction) => (
+              <div key={transaction.transactionId} className="transaction-card">
+                <p><strong>Transaction ID:</strong> {transaction.transactionId}</p>
+                <p><strong>Sender Account:</strong> {transaction.senderAccountNumber || 'N/A'}</p>
+                <p><strong>Receiver Account:</strong> {transaction.receiverAccountNumber}</p>
+                <p><strong>Date & Time:</strong> {new Date(transaction.transactionDateTime).toLocaleString()}</p>
+                <p><strong>Balance After Transfer:</strong> ${transaction.balanceAfterTransfer.toFixed(2)}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          <div className="pagination-controls">
+            <button onClick={handlePreviousPage} disabled={pageNumber === 0} className="pagination-btn">
+              Previous
+            </button>
+            <span>Page {pageNumber + 1} of {totalPages}</span>
+            <button onClick={handleNextPage} disabled={pageNumber === totalPages - 1} className="pagination-btn">
+              Next
+            </button>
+          </div>
+        </>
+      ) : (
+        <p>No transactions found for the given User PIN.</p>
+      )}
+    </div>
+  );
+}
+
+export default TransactionHistory;
+
+Step 2: UI for Entering User Pin
+
+This component remains the same, as it allows the user to enter their userPin before showing the transaction history.
+
+import React, { useState } from 'react';
+import './TransactionHistory.css'; // Style sheet
+
+function EnterUserPin({ onPinSubmit }) {
+  const [userPin, setUserPin] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (!userPin) {
+      setErrorMessage('Please enter your User PIN');
+      return;
+    }
+
+    // Pass the userPin to the parent component for API call
+    onPinSubmit(userPin);
+  };
+
+  return (
+    <div className="enter-pin-container">
+      <h2>Enter Your User PIN to View Transaction History</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="password"
+          placeholder="Enter User PIN"
+          value={userPin}
+          onChange={(e) => setUserPin(e.target.value)}
+          className="input-field"
+        />
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
+        <button type="submit" className="submit-btn">Submit</button>
+      </form>
+    </div>
+  );
+}
+
+export default EnterUserPin;
+
+Step 3: Combining Both Components
+
+import React, { useState } from 'react';
+import EnterUserPin from './EnterUserPin';
+import TransactionHistory from './TransactionHistory';
+
+function TransactionsPage() {
+  const [userPin, setUserPin] = useState(null);
+
+  const handlePinSubmit = (enteredPin) => {
+    setUserPin(enteredPin);
+  };
+
+  return (
+    <div className="transactions-page">
+      {userPin ? (
+        <TransactionHistory userPin={userPin} />
+      ) : (
+        <EnterUserPin onPinSubmit={handlePinSubmit} />
+      )}
+    </div>
+  );
+}
+
+export default TransactionsPage;
+
+Step 4: CSS (TransactionHistory.css)
+
+.enter-pin-container, .transaction-history-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  text-align: center;
+  background-color: #f9f9f9;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.input-field {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 16px;
+}
+
+.submit-btn {
+  background-color: #28a745;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.submit-btn:hover {
+  background-color: #218838;
+}
+
+.transaction-list {
+  margin-top: 20px;
+}
+
+.transaction-card {
+  background-color: white;
+  padding: 20px;
+  margin: 15px 0;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  text-align: left;
+}
+
+.transaction-card p {
+  margin: 8px 0;
+}
+
+.pagination-controls {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pagination-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.pagination-btn:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+Explanation:
+
+UI for userPin: Users first enter their userPin. If the field is empty, an error is shown.
+
+Transaction List: Once the user enters the correct userPin, the app will fetch and display transactions. If there are no transactions, a message is shown.
+
+Pagination: It will allow the user to navigate through pages of transactions.
+
+Error Handling: Any error in the API request will be caught and displayed.
+
+
+This solution should offer a clean, intuitive user experience. Let me know if you need further refinements or enhancements!
+
+                                         
