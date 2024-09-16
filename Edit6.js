@@ -1,4 +1,4 @@
-jiimport React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css'; // Updated CSS for the modern design
 
@@ -538,4 +538,275 @@ The close button in the modal allows the user to close the popup, hiding the mod
 
 This solution provides a neat, user-friendly way to display the transaction status as a popup.
 
+
+
+
+-#-#-#-#--#-#-#-#-#--#-#-#-#--#-#-#-#-#-#--#-#-#-#-#-#-#-#--#-#-#-#-#-#--#-#-#-#-#-#--#-#--#-#-#-#-#--#-#-$-$-#-#
+
+
+  To handle multiple response cases such as "Transfer successful", "Insufficient balance", and "Sender or receiver is not found", we will modify the UI to show appropriate messages based on the API response. We'll also make sure the modal is used to clearly display the corresponding message.
+
+Updated React Code (Transfer.js):
+
+import React, { useState } from 'react';
+import axios from 'axios';
+import './Transfer.css';
+
+function Transfer() {
+  const [senderId, setSenderId] = useState('');
+  const [receiverAccountNumber, setReceiverAccountNumber] = useState('');
+  const [receiverIFSC, setReceiverIFSC] = useState('');
+  const [amount, setAmount] = useState('');
+  const [senderPin, setSenderPin] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
+  const [transactionMessage, setTransactionMessage] = useState(''); // Transaction message state
+  const [isSuccess, setIsSuccess] = useState(false); // State to track if the transfer was successful
+
+  const handleTransfer = () => {
+    const url = `/api/transfer?senderId=${senderId}&receiverAccountNumber=${receiverAccountNumber}&receiverIFSC=${receiverIFSC}&amount=${amount}&senderPin=${senderPin}`;
+
+    axios.post(url)
+      .then((response) => {
+        const message = response.data; // Assuming the response contains the message directly
+        
+        // Handle different responses
+        if (message === 'Transfer successful') {
+          setIsSuccess(true);
+        } else if (message === 'Insufficient balance') {
+          setIsSuccess(false);
+        } else if (message === 'Sender or receiver is not found') {
+          setIsSuccess(false);
+        }
+        setTransactionMessage(message); // Set the response message
+        setIsModalOpen(true); // Show the modal
+      })
+      .catch((err) => {
+        setTransactionMessage('An error occurred. Please try again.');
+        setIsSuccess(false);
+        setIsModalOpen(true);
+        console.error(err);
+      });
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
+  return (
+    <div className="transfer-container">
+      <h2>Transfer Money</h2>
+
+      {/* Input fields */}
+      <div className="ifield">
+        <input
+          type="text"
+          placeholder="Sender Account No"
+          value={senderId}
+          onChange={(e) => setSenderId(e.target.value)}
+          className="input-field"
+        />
+      </div>
+      <div className="ifield">
+        <input
+          type="text"
+          placeholder="Receiver Account Number"
+          value={receiverAccountNumber}
+          onChange={(e) => setReceiverAccountNumber(e.target.value)}
+          className="input-field"
+        />
+      </div>
+      <div className="ifield">
+        <input
+          type="text"
+          placeholder="Receiver IFSC"
+          value={receiverIFSC}
+          onChange={(e) => setReceiverIFSC(e.target.value)}
+          className="input-field"
+        />
+      </div>
+      <div className="ifield">
+        <input
+          type="number"
+          placeholder="Amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="input-field"
+        />
+      </div>
+      <div className="ifield">
+        <input
+          type="password"
+          placeholder="Sender PIN"
+          value={senderPin}
+          onChange={(e) => setSenderPin(e.target.value)}
+          className="input-field"
+        />
+      </div>
+
+      {/* Transfer Button */}
+      <button className="transfer-btn" onClick={handleTransfer}>Transfer</button>
+
+      {/* Modal Popup for Success/Failure */}
+      {isModalOpen && (
+        <div className="modal">
+          <div className={`modal-content ${isSuccess ? 'success' : 'failure'}`}>
+            <h3>{transactionMessage}</h3>
+            <button className="close-btn" onClick={closeModal}>Close</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Transfer;
+
+Explanation:
+
+1. Handling Multiple Cases:
+
+Based on the response from the server, the message (response.data) is checked:
+
+If the message is "Transfer successful", we set the isSuccess state to true, and the UI will reflect the success message.
+
+If the message is "Insufficient balance" or "Sender or receiver is not found", we set isSuccess to false and show the failure message in the modal.
+
+
+The transaction message (transactionMessage) is updated with the response from the server and displayed in the modal.
+
+
+
+2. Conditional Styling:
+
+A new state isSuccess is used to apply conditional styling to the modal based on whether the transfer was successful or not. The modal content will have a different background color or design for success and failure cases.
+
+
+
+3. Default Error Handling:
+
+In case of an error (e.g., network issues), a fallback message "An error occurred. Please try again." is displayed.
+
+
+
+
+Updated CSS (Transfer.css):
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 40px;
+  border-radius: 15px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.modal-content.success {
+  border-left: 6px solid #28a745; /* Green border for success */
+}
+
+.modal-content.failure {
+  border-left: 6px solid #dc3545; /* Red border for failure */
+}
+
+.modal-content h3 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  padding: 12px 25px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.close-btn:hover {
+  background-color: #0056b3;
+}
+
+Key Changes in the CSS:
+
+1. Success/Failure Modal:
+
+For success responses, the modal gets a green border using .success.
+
+For failure responses (like "Insufficient balance" or "Sender or receiver is not found"), the modal gets a red border using .failure.
+
+
+
+
+What Happens Now:
+
+1. Success Case:
+
+If the response from the API is "Transfer successful", the modal will display the message in a green-bordered modal with the text "Transfer successful!".
+
+The isSuccess state is set to true, applying the .success styling.
+
+
+
+2. Failure Cases:
+
+If the response is "Insufficient balance" or "Sender or receiver is not found", the modal will display the corresponding message in a red-bordered modal.
+
+The isSuccess state is set to false, applying the .failure styling.
+
+
+
+3. General Error Handling:
+
+If there's an error in the request (network error, etc.), a generic error message "An error occurred. Please try again." is displayed in the modal.
+
+
+
+4. Modal Design:
+
+The modal is visually more distinct for success and failure cases:
+
+Green for success (#28a745) to give the user positive feedback.
+
+Red for failure (#dc3545), signaling an issue with the transfer.
+
+
+
+
+5. User Experience:
+
+The Close button allows the user to easily close the modal after seeing the transaction status.
+
+The modal provides a clean, consistent way to show transaction results, making the interaction more user-friendly and visually engaging.
+
+
+
+
+Example Walkthrough:
+
+If a user initiates a transfer and the backend responds with "Transfer successful", the modal will slide in, display a green border with the message, and allow the user to close it.
+
+If the transfer fails due to "Insufficient balance" or "Sender or receiver is not found", the modal will appear with a red border, showing the relevant error message, allowing the user to acknowledge and close it.
+
+
+This design ensures that users can clearly understand the result of their actions in the app, whether the transaction succeeds or fails, with proper visual feedback.
+
+  
             
