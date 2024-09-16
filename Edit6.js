@@ -1214,4 +1214,304 @@ h2 {
     </div>
   ))}
 </div>
-                                         
+
+
+
+
+#-#-#-#-#-#--#-#-#-#-#-#-#-#-#--#-#-#-#-#-*-*-*-
+ <div className="transaction-list">
+  {transactions.map((transaction) => {
+    // Convert transactionDateTime to a JS Date object
+    const transactionDate = new Date(transaction.transactionDateTime);
+    const date = transactionDate.toLocaleDateString();
+    const time = transactionDate.toLocaleTimeString();
+
+    return (
+      <div key={transaction.transactionId} className="transaction-card">
+        <p className="transaction-id"><strong>Transaction ID:</strong> {transaction.transactionId}</p>
+        <div className="transaction-details">
+          <p><strong>Sender:</strong> {transaction.senderAccountNumber || 'N/A'}</p>
+          <p><strong>Receiver:</strong> {transaction.receiverAccountNumber}</p>
+        </div>
+        <div className="transaction-details">
+          <p><strong>Date:</strong> {date}</p>
+          <p><strong>Time:</strong> {time}</p>
+        </div>
+        <div className="transaction-details">
+          <p className="transaction-balance"><strong>Balance:</strong> ${transaction.balanceAfterTransfer.toFixed(2)}</p>
+        </div>
+      </div>
+    );
+  })}
+</div>
+
+
+
+
+#-#-#-#--#-#-#-#-#-#--#-#-#-#-#-#-#-#-#-#-#--#-#-#-#-#-#-#-#-#--#-#-#-#-#-#-#--#-#-#-#-#-#-#-#-
+  Here's the full code for the Transaction History page, including the separation of date and time, pagination, and the enhanced CSS for a beautiful layout.
+
+Complete React Code for Transaction History
+
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import './TransactionHistory.css';
+
+function TransactionHistory() {
+  const [transactions, setTransactions] = useState([]);
+  const [userPin, setUserPin] = useState('');
+  const [error, setError] = useState('');
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const fetchTransactionHistory = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/api/transactions`, {
+        params: {
+          userPin: userPin,
+          page: page,
+        },
+      });
+      setTransactions(response.data.content);
+      setTotalPages(response.data.totalPages);
+      setError('');
+    } catch (err) {
+      setError('Failed to fetch transactions. Please check your user PIN.');
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (userPin) {
+      fetchTransactionHistory();
+    } else {
+      setError('Please enter your user PIN.');
+    }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
+
+  useEffect(() => {
+    if (userPin) {
+      fetchTransactionHistory();
+    }
+  }, [page]);
+
+  return (
+    <div className="transaction-history-container">
+      <h2>Transaction History</h2>
+
+      <form onSubmit={handleSubmit} className="user-pin-form">
+        <input
+          type="text"
+          placeholder="Enter your User PIN"
+          value={userPin}
+          onChange={(e) => setUserPin(e.target.value)}
+          className="input-field"
+        />
+        <button type="submit" className="submit-btn">View Transactions</button>
+      </form>
+
+      {error && <p className="error-message">{error}</p>}
+
+      <div className="transaction-list">
+        {transactions.map((transaction) => {
+          const transactionDate = new Date(transaction.transactionDateTime);
+          const formattedDate = transactionDate.toLocaleDateString();
+          const formattedTime = transactionDate.toLocaleTimeString();
+
+          return (
+            <div key={transaction.transactionId} className="transaction-card">
+              <p className="transaction-id"><strong>Transaction ID:</strong> {transaction.transactionId}</p>
+              <div className="transaction-details">
+                <p><strong>Sender:</strong> {transaction.senderAccountNumber || 'N/A'}</p>
+                <p><strong>Receiver:</strong> {transaction.receiverAccountNumber}</p>
+              </div>
+              <div className="transaction-details">
+                <p><strong>Date:</strong> {formattedDate}</p>
+                <p><strong>Time:</strong> {formattedTime}</p>
+              </div>
+              <p className="transaction-balance"><strong>Balance:</strong> ${transaction.balanceAfterTransfer.toFixed(2)}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      {transactions.length > 0 && (
+        <div className="pagination-controls">
+          <button
+            className="pagination-btn"
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 0}
+          >
+            Previous
+          </button>
+          <button
+            className="pagination-btn"
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page >= totalPages - 1}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default TransactionHistory;
+
+Complete CSS for Transaction History (TransactionHistory.css)
+
+.transaction-history-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f0f4f7;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.user-pin-form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.input-field {
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+  width: 250px;
+}
+
+.submit-btn {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.transaction-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.transaction-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.transaction-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.transaction-card p {
+  margin: 10px 0;
+  font-size: 16px;
+  color: #555;
+}
+
+.transaction-card strong {
+  color: #333;
+  font-weight: bold;
+}
+
+.transaction-card .transaction-id {
+  color: #007bff;
+  font-size: 14px;
+  word-break: break-all;
+  font-weight: bold;
+}
+
+.transaction-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+.transaction-details p {
+  margin: 0;
+}
+
+.transaction-balance {
+  color: #28a745;
+  font-size: 18px;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.pagination-controls {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pagination-btn {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin: 0 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination-btn:hover {
+  background-color: #0056b3;
+}
+
+.pagination-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+Explanation:
+
+User PIN Form: The form allows the user to enter their userPin and view transactions after submission.
+
+Grid-based Layout: The transactions are displayed in a grid, and each transaction is presented within a card. The grid adjusts for responsiveness using grid-template-columns.
+
+Pagination: There are Previous and Next buttons that allow the user to navigate through pages of transactions. The buttons are disabled when on the first or last page.
+
+Date and Time Split: The transactionDateTime is split into separate Date and Time fields and displayed in a clean and distinct format.
+
+
+This should provide a visually appealing and functional transaction history page. Let me know if you want to tweak the design further!
+
+
