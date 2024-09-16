@@ -219,9 +219,8 @@ function Home() {
 export default Home;
 
 
-To modify your code so that the success or failure of the transaction is shown after receiving the response from the API, and to ensure that senderPin, receiverAccountNumber, receiverIFSC, and amount are passed as parameters in the POST request, I made the necessary changes. Here’s the updated code:
 
-Updated Code:
+
 
 import React, { useState } from 'react';
 import axios from 'axios';
@@ -238,14 +237,11 @@ function Transfer() {
 
   // Function to handle the transfer
   const handleTransfer = () => {
+    // Construct the URL with query parameters
+    const url = `/api/transfer?senderId=${senderId}&receiverAccountNumber=${receiverAccountNumber}&receiverIFSC=${receiverIFSC}&amount=${amount}&senderPin=${senderPin}`;
+
     // Make the POST request with axios
-    axios.post('/api/transfer', {
-      senderId, // Sender ID
-      senderPin, // Sender PIN
-      receiverAccountNumber, // Receiver Account Number
-      receiverIFSC, // Receiver IFSC
-      amount, // Amount to transfer
-    })
+    axios.post(url)
       .then((response) => {
         setTransactionStatus('Transfer successful!'); // Show success message
         alert('Transfer successful!');
@@ -330,89 +326,3 @@ function Transfer() {
 }
 
 export default Transfer;
-
-Changes and Enhancements:
-
-1. State Management:
-
-Added state for receiverAccountNumber, receiverIFSC, and transactionStatus.
-
-transactionStatus is used to display a success or failure message after the transfer.
-
-
-
-2. Handle POST Request:
-
-The handleTransfer function sends a POST request using axios.post with all required parameters: senderId, senderPin, receiverAccountNumber, receiverIFSC, and amount.
-
-
-
-3. Transaction Status:
-
-After the response is received, the transactionStatus state is updated with either "Transfer successful!" or "Transfer failed!" based on the API response.
-
-A message is displayed on the page to inform the user about the success or failure of the transaction.
-
-
-
-4. Error Handling:
-
-The .catch block logs the error and displays the failure message to the user.
-
-
-
-5. UI Enhancements:
-
-A conditional <p> element is added below the form to display the transaction status.
-
-If the transaction is successful, it will display a success message, and if it fails, it will show a failure message. The class names (success or failure) can be styled using CSS to make the message stand out.
-
-
-
-
-Example CSS (Transfer.css):
-
-You can add these styles to highlight success and failure messages.
-
-.success {
-  color: green;
-  font-weight: bold;
-}
-
-.failure {
-  color: red;
-  font-weight: bold;
-}
-
-.transfer-container {
-  /* Your existing styles */
-}
-
-.input-field {
-  /* Your existing styles */
-}
-
-.transfer-btn {
-  /* Your existing styles */
-}
-
-Backend API Endpoint:
-
-Make sure your backend /api/transfer endpoint is set up to accept the following parameters:
-
-senderId
-
-senderPin
-
-receiverAccountNumber
-
-receiverIFSC
-
-amount
-
-
-It should respond with a success or failure status accordingly.
-
-This setup will send the correct POST request with all the necessary parameters and display the success or failure of the transaction based on the API response. Let me know if you need further assistance!
-
-            
