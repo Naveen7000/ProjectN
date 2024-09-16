@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+jiimport React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css'; // Updated CSS for the modern design
 
@@ -326,3 +326,216 @@ function Transfer() {
 }
 
 export default Transfer;
+
+-#-#-#-#--#-#-#-#-#-#-#-#-#-#-#--#-#-#-#-#-#-#--#-#-#-#-#-##-#--#-#-#-#-
+
+pop up window 
+To display a popup modal with a success message and a close button instead of showing the message at the bottom, you can use the built-in JavaScript window.alert() function or implement a custom modal using HTML, CSS, and React.
+
+Here’s how you can create a custom popup modal that displays a success message and includes a close button:
+
+Updated Code:
+
+import React, { useState } from 'react';
+import axios from 'axios';
+import './Transfer.css';
+
+function Transfer() {
+  // State for form inputs
+  const [senderId, setSenderId] = useState('');
+  const [receiverAccountNumber, setReceiverAccountNumber] = useState('');
+  const [receiverIFSC, setReceiverIFSC] = useState('');
+  const [amount, setAmount] = useState('');
+  const [senderPin, setSenderPin] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+  const [transactionMessage, setTransactionMessage] = useState(''); // For success or failure message
+
+  // Function to handle the transfer
+  const handleTransfer = () => {
+    // Construct the URL with query parameters
+    const url = `/api/transfer?senderId=${senderId}&receiverAccountNumber=${receiverAccountNumber}&receiverIFSC=${receiverIFSC}&amount=${amount}&senderPin=${senderPin}`;
+
+    // Make the POST request with axios
+    axios.post(url)
+      .then((response) => {
+        setTransactionMessage('Transfer successful!'); // Set the success message
+        setIsModalOpen(true); // Open the modal
+      })
+      .catch((err) => {
+        setTransactionMessage('Transfer failed!'); // Set the failure message
+        setIsModalOpen(true); // Open the modal
+        console.error(err);
+      });
+  };
+
+  // Function to close the modal
+  const closeModal = () => {
+    setIsModalOpen(false); // Close the modal
+  };
+
+  return (
+    <div className="transfer-container">
+      <h2>Transfer Money</h2>
+
+      {/* Sender Account Number Input */}
+      <div className="ifield">
+        <input
+          type="text"
+          placeholder="Account No"
+          value={senderId}
+          onChange={(e) => setSenderId(e.target.value)}
+          className="input-field"
+        />
+      </div>
+
+      {/* Receiver Account Number Input */}
+      <div className="ifield">
+        <input
+          type="text"
+          placeholder="Receiver Account Number"
+          value={receiverAccountNumber}
+          onChange={(e) => setReceiverAccountNumber(e.target.value)}
+          className="input-field"
+        />
+      </div>
+
+      {/* Receiver IFSC Input */}
+      <div className="ifield">
+        <input
+          type="text"
+          placeholder="Receiver IFSC"
+          value={receiverIFSC}
+          onChange={(e) => setReceiverIFSC(e.target.value)}
+          className="input-field"
+        />
+      </div>
+
+      {/* Amount Input */}
+      <div className="ifield">
+        <input
+          type="number"
+          placeholder="Amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          className="input-field"
+        />
+      </div>
+
+      {/* Sender PIN Input */}
+      <div className="ifield">
+        <input
+          type="password"
+          placeholder="Sender PIN"
+          value={senderPin}
+          onChange={(e) => setSenderPin(e.target.value)}
+          className="input-field"
+        />
+      </div>
+
+      {/* Transfer Button */}
+      <button className="transfer-btn" onClick={handleTransfer}>Transfer</button>
+
+      {/* Modal Popup for Success/Failure */}
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>{transactionMessage}</h3>
+            <button className="close-btn" onClick={closeModal}>Close</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Transfer;
+
+Explanation:
+
+1. Modal State:
+
+The isModalOpen state is used to control whether the modal is visible or hidden.
+
+The transactionMessage state stores the success or failure message to display inside the modal.
+
+
+
+2. Handling Transfer:
+
+After the POST request succeeds or fails, the success or failure message is set, and the modal is opened by setting isModalOpen to true.
+
+
+
+3. Closing the Modal:
+
+The closeModal function sets isModalOpen to false, hiding the modal when the Close button is clicked.
+
+
+
+4. Modal Popup:
+
+A modal is conditionally rendered based on the value of isModalOpen.
+
+The modal contains the transactionMessage (success or failure) and a Close button.
+
+
+
+
+Modal Styles in Transfer.css:
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
+}
+
+.close-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  background-color: #0056b3;
+}
+
+Key Points:
+
+1. Modal:
+
+The modal covers the whole screen with a semi-transparent background and centers the message box using flex for alignment.
+
+The modal will pop up whenever a transfer is successful or fails.
+
+
+
+2. Close Button:
+
+The close button in the modal allows the user to close the popup, hiding the modal and returning to the form.
+
+
+
+
+This solution provides a neat, user-friendly way to display the transaction status as a popup.
+
+            
