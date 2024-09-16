@@ -1077,4 +1077,141 @@ Error Handling: Any error in the API request will be caught and displayed.
 
 This solution should offer a clean, intuitive user experience. Let me know if you need further refinements or enhancements!
 
+
+#-#-#-#-#--#-#-#-#-+#+#+#+#+#+#+#-#-#-#-#--#-#-#-#-#--#-#-#-#---#-#-#-#-#-#-#-#--
+
+  .transaction-history-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f0f4f7;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+  font-size: 32px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.transaction-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.transaction-card {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.transaction-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.transaction-card p {
+  margin: 10px 0;
+  font-size: 16px;
+  color: #555;
+}
+
+.transaction-card strong {
+  color: #333;
+  font-weight: bold;
+}
+
+.transaction-card .transaction-id {
+  color: #007bff;
+  font-size: 14px;
+  word-break: break-all;
+  font-weight: bold;
+}
+
+.pagination-controls {
+  margin-top: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.pagination-btn {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin: 0 10px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.pagination-btn:hover {
+  background-color: #0056b3;
+}
+
+.pagination-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* Styling for the transaction details */
+.transaction-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+}
+
+.transaction-details p {
+  margin: 0;
+}
+
+.transaction-balance {
+  color: #28a745;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .transaction-card {
+    padding: 15px;
+  }
+
+  h2 {
+    font-size: 24px;
+  }
+
+  .pagination-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+}
+
+<div className="transaction-list">
+  {transactions.map((transaction) => (
+    <div key={transaction.transactionId} className="transaction-card">
+      <p className="transaction-id"><strong>Transaction ID:</strong> {transaction.transactionId}</p>
+      <div className="transaction-details">
+        <p><strong>Sender:</strong> {transaction.senderAccountNumber || 'N/A'}</p>
+        <p><strong>Receiver:</strong> {transaction.receiverAccountNumber}</p>
+      </div>
+      <div className="transaction-details">
+        <p><strong>Date:</strong> {new Date(transaction.transactionDateTime).toLocaleString()}</p>
+        <p className="transaction-balance"><strong>Balance:</strong> ${transaction.balanceAfterTransfer.toFixed(2)}</p>
+      </div>
+    </div>
+  ))}
+</div>
                                          
