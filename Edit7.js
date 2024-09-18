@@ -372,4 +372,191 @@ export default App;
 This will ensure that when the user clicks the Sign up text, it will navigate to the Register page, providing a smooth user experience.
 
 
+#-#-#--#-#-#-#-#-#-#-#-#--#-#-#-#-#-#-#-#-#-#-#-#-#-#--#-#-#-#-#-#-#-#-#-#-#-#-#-
+
+  To achieve this, you can update the functionality of the close button in the pop-up window to not only close the pop-up but also navigate the user to the login page.
+
+Key Steps:
+
+1. Handle the close button click event in the pop-up.
+
+
+2. Use the useNavigate hook from react-router-dom to redirect the user to the login page.
+
+
+
+Here’s how you can modify the existing code for the Register page:
+
+Updated Register Page
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import axios from 'axios';
+import './Register.css';
+
+function Register() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [userDetails, setUserDetails] = useState(null); // For storing the user details response
+  const navigate = useNavigate(); // For navigation
+
+  const handleRegister = async () => {
+    try {
+      const response = await axios.post('/api/register', {
+        firstName,
+        lastName,
+        email,
+        password
+      });
+
+      setUserDetails(response.data); // Store user details in state
+    } catch (error) {
+      console.error('Registration failed:', error);
+    }
+  };
+
+  const handleClosePopup = () => {
+    // Close the pop-up and navigate to login page
+    setUserDetails(null);
+    navigate('/login'); // Navigate to login after closing the pop-up
+  };
+
+  return (
+    <div className="register-container">
+      {!userDetails ? (
+        <div className="register-box">
+          <h2>Register</h2>
+          <div className="input-container">
+            <input
+              type="text"
+              placeholder="First Name"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="input-field"
+            />
+          </div>
+          <div className="input-container">
+            <input
+              type="text"
+              placeholder="Last Name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              className="input-field"
+            />
+          </div>
+          <div className="input-container">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="input-field"
+            />
+          </div>
+          <div className="input-container">
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="input-field"
+            />
+          </div>
+          <button className="register-btn" onClick={handleRegister}>
+            Register
+          </button>
+        </div>
+      ) : (
+        <div className="popup">
+          <div className="popup-content">
+            <h2>Welcome {userDetails.firstName} {userDetails.lastName}!</h2>
+            <p>User ID: {userDetails.userId}</p>
+            <p>Account Number: {userDetails.accountNumber}</p>
+            <p>IFSC Code: {userDetails.ifscCode}</p>
+            <p>PIN: {userDetails.pin}</p>
+            <button className="close-btn" onClick={handleClosePopup}>
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Register;
+
+Key Changes:
+
+1. handleClosePopup: When the close button is clicked, the userDetails is set to null to hide the pop-up, and navigate('/login') is called to redirect the user to the login page.
+
+
+2. Conditionally Render: The registration form is shown only if userDetails is null. Once the user registers and gets the response, the pop-up is displayed with the user information. After clicking the Close button, it navigates to the login page.
+
+
+
+Popup CSS (for a more appealing layout):
+
+.popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.popup-content {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.popup-content h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.popup-content p {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+.close-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.close-btn:hover {
+  background-color: #0056b3;
+}
+
+Explanation:
+
+Popup Styling: The pop-up covers the whole screen with a semi-transparent background (rgba(0, 0, 0, 0.5)) and centers the pop-up content.
+
+Close Button: When clicked, it triggers the handleClosePopup function to both close the pop-up and navigate to the login page.
+
+
+With this code, once the user successfully registers, they will see a pop-up with their user details, and upon clicking Close, they will be redirected to the login page.
+
+                
+
+
 
