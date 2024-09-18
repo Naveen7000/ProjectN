@@ -244,3 +244,132 @@ The form has simple and intuitive validation.
 
 This layout should provide a clean and professional registration page. Let me know if you'd like to add any more features or modify the design!
 
+
+
+
+#-#-#-#-#-#-#--#-#-#-#-#-#-#-#-#-#--#-#-#-#-#-#-#-#-#-#-#-#--#-#-#-#-#-#-#-#-#-#-#-
+
+  To make the <p> tag clickable and redirect to the Register page when clicked, you can use React Router's useNavigate hook. This will allow you to handle client-side navigation between pages.
+
+Here’s how you can modify your login page to make the Signup text clickable:
+
+Updated Login Page with Clickable Signup
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
+import './Login.css';
+
+function Login() {
+  const [userID, setUserID] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  const handleLogin = () => {
+    if (userID && password) {
+      // Perform your login logic here
+      navigate('/home'); // Redirect to Home page after successful login
+    } else {
+      alert('Please enter your email and password.');
+    }
+  };
+
+  // Navigate to the register page on click
+  const handleSignupClick = () => {
+    navigate('/register'); // Redirect to Register page
+  };
+
+  return (
+    <div className="login-container">
+      <div className="login-box">
+        <h2>Welcome to MoneyFlow</h2>
+        <p>Transfer money securely and easily</p>
+        <div className="input-container">
+          <input
+            type="text"
+            placeholder="User ID"
+            value={userID}
+            onChange={(e) => setUserID(e.target.value)}
+            className="input-field"
+          />
+        </div>
+        <div className="input-container">
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="input-field"
+          />
+        </div>
+        <button onClick={handleLogin} className="login-btn">
+          Login
+        </button>
+
+        {/* Make the Signup text clickable */}
+        <p className="signup-text" onClick={handleSignupClick}>
+          Don't have an account? Sign up here.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default Login;
+
+Key Points:
+
+useNavigate: We use useNavigate from react-router-dom to handle navigation between pages.
+
+handleSignupClick: This function will be triggered when the user clicks the "Sign up here" text. It redirects the user to the Register page using navigate('/register').
+
+Clickable Text: The <p> element for the signup text has an onClick event that triggers the navigation.
+
+
+CSS (Optional, for styling the clickable text)
+
+You can add some styling to make the signup text look more clickable and user-friendly.
+
+.signup-text {
+  color: #007bff;
+  cursor: pointer;
+  margin-top: 20px;
+  font-size: 16px;
+}
+
+.signup-text:hover {
+  text-decoration: underline;
+}
+
+Steps to Ensure:
+
+1. Ensure that React Router is properly set up in your application with routes defined for both the login and register pages.
+
+
+2. Your route configuration should look something like this:
+
+
+
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Login from './Login';
+import Register from './Register';
+import Home from './Home';
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Login />} /> {/* Default to Login */}
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
+
+This will ensure that when the user clicks the Sign up text, it will navigate to the Register page, providing a smooth user experience.
+
+
+
