@@ -259,3 +259,99 @@ Main Application Class Location
 Make sure the main application class, typically named MoneyFlowApplication.java, is at the root of the package structure (in com.example.moneyflow). This allows Spring Boot to scan all the sub-packages for components, services, and configuration classes.
 
 
+
+-#-#-#-#--#-#-#--#-#-#-#-#--#-#-#-#-#---#-#-#-#-#--#-#-#-#-#--#-#-#--#-#-#-#---#-#-#----#-
+
+In Spring Security 6.x, the method passwordEncoder() is no longer called on HttpSecurity. Instead, you configure the PasswordEncoder directly in the AuthenticationManagerBuilder, and it is injected separately using a method like configure(AuthenticationManagerBuilder auth).
+
+To resolve this, here's how you should configure both the AuthenticationManager and the PasswordEncoder correctly:
+
+Updated SecurityConfig for Spring Security 6.x
+
+1. Inject the AuthenticationManagerBuilder directly to set the UserDetailsService and PasswordEncoder.
+
+
+2. Remove the call to passwordEncoder() from HttpSecurity.
+
+
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Autowired
+    private CustomUserDetailsService customUserDetailsService;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // Configure the authenticationManager with userDetailsService and passwordEncoder
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+            .userDetailsService(customUserDetailsService)
+            .passwordEncoder(passwordEncoder());
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())  // Disable CSRF for simplicity
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/user/register", "/api/user/login").permitAll()  // Permit register and login
+                .anyRequest().authenticated()  // Protect all other endpoints
+            )
+            .httpBasic(withDefaults());  // Use withDefaults() for HTTP Basic authentication
+
+        return http.build();
+    }
+}
+
+Key Points:
+
+1. Configure PasswordEncoder in AuthenticationManagerBuilder:
+
+Instead of calling passwordEncoder() on HttpSecurity, you configure it globally using AuthenticationManagerBuilder.
+
+The configureGlobal() method (or similar) allows you to set up the UserDetailsService and PasswordEncoder in a separate configuration block.
+
+
+
+2. Global Authentication Configuration:
+
+The configureGlobal() method is injected using @Autowired and is responsible for configuring how authentication works, including the PasswordEncoder and UserDetailsService.
+
+
+
+3. HttpSecurity:
+
+In the securityFilterChain() method, you now just focus on securing the HTTP endpoints, without worrying about the authentication details. You call .httpBasic(withDefaults()) for basic authentication and use .build() to complete the security filter configuration.
+
+
+
+
+Summary:
+
+The passwordEncoder() method is used with AuthenticationManagerBuilder, not HttpSecurity.
+
+The global authentication configuration is handled separately, where you define the UserDetailsService and PasswordEncoder.
+
+
+This should resolve the issue with passwordEncoder in HttpSecurity and properly configure Spring Security in your application.
+
+    
+
+
