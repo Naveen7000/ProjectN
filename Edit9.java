@@ -614,5 +614,117 @@ Explanation of changes:
 parserBuilder(): This method replaces parser().
 
 
+    #-#-#-#--#-##-#-#-#-#-##-#-#-#-#-#-#-
+
+    The methods .signWith, .setSigningKey, and .parser() in the io.jsonwebtoken library have been deprecated in recent versions of the JJWT library. You can use the updated methods to ensure that the code conforms to the latest standards.
+
+Here is how you can update your JwtTokenProvider class to address these deprecated methods:
+
+Key Updates:
+
+1. signWith now takes a Key object instead of a String.
+
+
+2. Jwts.parser() has been replaced by Jwts.parserBuilder().
+
+
+3. setSigningKey also uses a Key object instead of a String.
+
+
+
+Updated Code:
+
+package com.example.moneyflow.security;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
+
+@Component
+public class JwtTokenProvider {
+
+    // Use a SecretKey instead of a string for security purposes
+    private final SecretKey JWT_SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS512);
+    private final long JWT_EXPIRATION = 86400000L;  // 1 day
+
+    // Generate a JWT token
+    public String generateToken(Authentication authentication) {
+        String userId = authentication.getName();
+
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
+
+        return Jwts.builder()
+                .setSubject(userId)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(JWT_SECRET_KEY)  // Use SecretKey instead of a string
+                .compact();
+    }
+
+    // Extract userId from JWT token
+    public String getUserIdFromJWT(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(JWT_SECRET_KEY)  // Use SecretKey
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
+    }
+
+    // Validate JWT token
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                .setSigningKey(JWT_SECRET_KEY)  // Use SecretKey
+                .build()
+                .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}
+
+Explanation of Changes:
+
+1. SecretKey for Signing:
+
+Instead of using a string for signing the JWT, we use Keys.secretKeyFor(SignatureAlgorithm.HS512) to generate a SecretKey. This is more secure and is the recommended approach in newer versions of JJWT.
+
+
+
+2. parser() to parserBuilder():
+
+The parser() method has been replaced with parserBuilder(), which allows setting the signing key using setSigningKey() and then building the parser.
+
+
+
+3. Using SecretKey:
+
+Both signWith() and setSigningKey() now require SecretKey instead of plain strings. This provides better cryptographic security.
+
+
+
+
+Dependencies:
+
+Make sure you are using the latest version of the JJWT library:
+
+implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'  // Required if you want to use Jackson for JSON serialization/deserialization
+
+This code should now be up-to-date with the latest standards and remove any deprecated method issues. Let me know if you need further clarification!
+
+    
+
     
 
