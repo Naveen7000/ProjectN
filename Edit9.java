@@ -511,3 +511,108 @@ All deprecated methods (like httpBasic(), .and()) are avoided in favor of up-to-
 
 Let me know if you encounter any issues during implementation or need further clarification!
 
+
+
+  In the latest version of the JJWT (Java JWT) library, some methods like .signWith(), .setSigningKey(), and .parser() have been deprecated and replaced with new alternatives to make the API safer and easier to use. Here's how you can modify your JWT generation and validation logic using the new methods.
+
+Key Changes:
+
+1. signWith now requires you to pass the SecretKey directly instead of a byte[] or String.
+
+
+2. setSigningKey has been replaced with signWith() or build() depending on your use case.
+
+
+3. parser() has been replaced with JwtParserBuilder.
+
+
+
+Updated JWT Generation and Validation
+
+Step 1: Generate JWT Tokens
+
+In your JwtTokenUtil (or equivalent class), modify the token generation method to use the new .signWith():
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import io.jsonwebtoken.security.Keys;
+
+public class JwtTokenUtil {
+
+    private static final long JWT_TOKEN_VALIDITY = 5 * 60 * 60; // 5 hours
+
+    // Example key. Use a more secure key in production.
+    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+    // Generate token for user
+    public String generateToken(String userId) {
+        Map<String, Object> claims = new HashMap<>();
+        return doGenerateToken(claims, userId);
+    }
+
+    // Helper method to generate the token
+    private String doGenerateToken(Map<String, Object> claims, String subject) {
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + JWT_TOKEN_VALIDITY * 1000))
+                .signWith(secretKey)  // No longer need .setSigningKey()
+                .compact();
+    }
+}
+
+Explanation of changes:
+
+Keys.secretKeyFor(SignatureAlgorithm.HS256): This method is now used to generate a SecretKey for signing.
+
+.signWith(secretKey): The secret key is passed directly into signWith().
+
+
+Step 2: Validate and Parse JWT Tokens
+
+In the token validation method, use JwtParserBuilder instead of parser():
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import javax.crypto.SecretKey;
+
+public class JwtTokenUtil {
+
+    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+    // Validate the token
+    public Claims getAllClaimsFromToken(String token) {
+        return Jwts.parserBuilder()    // Replaces .parser()
+                .setSigningKey(secretKey)  // Use secret key directly
+                .build()    // New method to return a JwtParser
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    // Check if the token has expired
+    public Boolean isTokenExpired(String token) {
+        final Date expiration = getAllClaimsFromToken(token).getExpiration();
+        return expiration.before(new Date());
+    }
+
+    // Validate token
+    public Boolean validateToken(String token, String userId) {
+        final String username = getAllClaimsFromToken(token).getSubject();
+        return (username.equals(userId) && !isTokenExpired(token));
+    }
+}
+
+Explanation of changes:
+
+parserBuilder(): This method replaces parser().
+
+
+    
+
