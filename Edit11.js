@@ -230,3 +230,281 @@ Ensure your React Router setup is correct and the navigation works without reloa
 The navbar should appear consistently across all pages and allow navigation to the Home page, Transfer page, and Transaction History page.
 
 
+
+
+
+  #-#-#--#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#--#-#-#
+
+
+  Here’s an updated modern, trendy CSS for the navigation bar and transaction history page, with a more minimalistic and stylish look. I’ve replaced the buttons with text links and enhanced the overall design for a super cool vibe.
+
+Updated CSS for the Navbar (Navbar.css)
+
+/* Modern Navbar Styling */
+.navbar {
+  background-color: #2d3436; /* Dark gray background */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-logo h2 {
+  color: #dfe6e9; /* Light gray color */
+  margin: 0;
+  font-size: 26px;
+  font-family: 'Poppins', sans-serif; /* Modern font */
+  font-weight: bold;
+}
+
+.navbar-links {
+  list-style-type: none;
+  display: flex;
+  gap: 30px; /* Increased gap for modern spacing */
+  margin: 0;
+}
+
+.navbar-links li {
+  display: inline;
+}
+
+.nav-link {
+  color: #dfe6e9; /* Light gray text color */
+  text-decoration: none;
+  font-size: 18px;
+  font-family: 'Poppins', sans-serif;
+  padding-bottom: 2px;
+  position: relative;
+  transition: color 0.3s ease;
+}
+
+.nav-link::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #00cec9; /* Highlight color */
+  transition: width 0.3s;
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+}
+
+.nav-link:hover {
+  color: #00cec9; /* Hover color */
+}
+
+.nav-link:hover::after {
+  width: 100%; /* Underline effect */
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+  .navbar-links {
+    flex-direction: column;
+    gap: 15px;
+    margin: 0;
+  }
+
+  .nav-link {
+    font-size: 20px;
+    padding: 10px 0;
+  }
+}
+
+Updated CSS for Transaction History (TransactionHistory.css)
+
+/* Modern Transaction History Styling */
+.transaction-history-container {
+  padding: 30px;
+  font-family: 'Poppins', sans-serif; /* Modern font */
+  background-color: #f5f5f5; /* Light background */
+}
+
+.transaction-history-container h2 {
+  color: #2d3436; /* Dark title color */
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 8px; /* Modern rounded corners */
+  overflow: hidden;
+}
+
+.transaction-table th, .transaction-table td {
+  padding: 16px 20px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  font-size: 16px;
+  color: #2d3436;
+}
+
+.transaction-table th {
+  background-color: #2d3436; /* Dark header background */
+  color: #dfe6e9; /* Light text color */
+  text-transform: uppercase; /* Modern uppercase text */
+}
+
+.transaction-table tr:hover {
+  background-color: #f1f2f6; /* Subtle hover effect */
+}
+
+.transaction-table td {
+  color: #636e72; /* Muted gray for text */
+}
+
+/* Responsive design for tables */
+@media (max-width: 768px) {
+  .transaction-table th, .transaction-table td {
+    padding: 12px 15px;
+    font-size: 14px;
+  }
+}
+
+Updated CSS for Modal and Form in Transfer.css
+
+/* Transfer Form Styling */
+.transfer-container {
+  background-color: #ffffff;
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 30px;
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif; /* Modern font */
+}
+
+h2 {
+  font-size: 24px;
+  color: #2d3436;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.input-field {
+  width: 100%;
+  padding: 14px;
+  margin: 10px 0;
+  border: 1px solid #b2bec3;
+  border-radius: 6px;
+  font-size: 16px;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.3s ease;
+}
+
+.input-field:focus {
+  border-color: #00cec9; /* Focus border color */
+  outline: none;
+}
+
+.transfer-btn {
+  width: 100%;
+  padding: 14px;
+  background-color: #00cec9;
+  border: none;
+  color: white;
+  border-radius: 6px;
+  font-size: 18px;
+  font-family: 'Poppins', sans-serif;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.transfer-btn:hover {
+  background-color: #01a59e;
+}
+
+/* Modal Popup Styling */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  width: 400px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.success {
+  border-left: 5px solid #2ecc71; /* Success border */
+}
+
+.failure {
+  border-left: 5px solid #e74c3c; /* Failure border */
+}
+
+.modal-content h3 {
+  font-size: 22px;
+  color: #2d3436;
+  margin-bottom: 20px;
+}
+
+.close-btn {
+  background-color: #2d3436;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+
+.close-btn:hover {
+  background-color: #636e72;
+}
+
+Explanation:
+
+Navbar:
+
+I've replaced the button-like styles with cleaner, modern links. The underline effect on hover gives it a cool and sleek look.
+
+The color scheme uses muted dark tones with a bright hover effect, making it feel minimalist and trendy.
+
+
+Transaction Table:
+
+I've added modern rounded corners, shadow effects, and subtle hover effects to the rows to make the table look more stylish.
+
+The header uses uppercase text, and the table rows have clean, readable typography.
+
+
+Transfer Form and Modal:
+
+The input fields and buttons have been updated with modern styling, such as rounded corners and shadow effects, for a more polished appearance.
+
+The modal has success/failure indicators with a clean border to match modern UX trends.
+
+
+
+Step 1: Install Google Fonts (Optional)
+
+If you haven’t included Poppins font, you can add it in your index.html file:
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+Final Note:
+
+This updated look will give your project a much more modern, sleek, and trendy design. You can adjust the colors and other properties based on your project’s theme.
+
+
+
+
