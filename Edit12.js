@@ -149,8 +149,7 @@ If credentials are invalid or there’s another issue, the appropriate error mes
   #-#-#-#--#-#-#-#-#--#-#-#-#-#-#--#-#-#-#-#-#-#-#-#--#-#-#-#-#-#-#-#--#-#-#-#-#-#-
 
 
-
-  Yes, you can retrieve user details from a JWT (JSON Web Token). JWTs typically consist of three parts: a header, a payload, and a signature. The payload contains the claims or data about the user, and this can include information like the user ID, email, roles, etc.
+Yes, you can retrieve user details from a JWT (JSON Web Token). JWTs typically consist of three parts: a header, a payload, and a signature. The payload contains the claims or data about the user, and this can include information like the user ID, email, roles, etc.
 
 Here's how you can extract the payload (which contains user details) from a JWT on the client side:
 
@@ -273,9 +272,66 @@ function Login() {
         {/* Example showing user details */}
         {userDetails && (
           <div className="user-details">
-            <p>Welcome, {userDetails.username}!</
+            <p>Welcome, {userDetails.username}!</p>
+            <p>Email: {userDetails.email}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
-              
+export default Login;
 
+Explanation:
+
+Token Decoding: After a successful login, the token is extracted from the response and decoded using the jwt-decode library.
+
+User Details: Once the token is decoded, the user details are stored in the userDetails state and can be accessed or displayed in the UI.
+
+
+Option 2: Manually Decoding JWT (Without Library)
+
+If you don’t want to use an external library, you can manually decode the base64-encoded JWT like this:
+
+function parseJwt(token) {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split('')
+      .map(function (c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join('')
+  );
+  return JSON.parse(jsonPayload);
+}
+
+You can then replace the jwt_decode(token) line with parseJwt(token) to decode the JWT manually.
+
+JWT Payload Example:
+
+A JWT payload might look like this:
+
+{
+  "userId": "12345",
+  "username": "john_doe",
+  "email": "john@example.com",
+  "exp": 1700000000
+}
+
+You can now use this information to display user-specific data or store it for later use.
+
+Important Notes:
+
+1. Security: While you can decode the JWT on the client side, be careful with the information you store there. Sensitive data should not be stored in the JWT. Always verify the token on the server side.
+
+
+2. Token Expiry: JWTs usually include an expiration time (exp). You should check if the token is still valid and handle token expiration appropriately.
+
+
+
+    
 
           
