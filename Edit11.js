@@ -508,3 +508,151 @@ This updated look will give your project a much more modern, sleek, and trendy d
 
 
 
+    Here’s the updated CSS for the modern navigation bar where the logo is positioned to the left, and the navigation links are displayed one after another as clickable text. The links will be text-only with a subtle underline effect on hover, giving it a clean, minimalistic, and trendy look.
+
+Modern Navigation Bar CSS (Navbar.css)
+
+/* Modern Navbar Styling */
+.navbar {
+  background-color: #2d3436; /* Dark gray background */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 40px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  font-family: 'Poppins', sans-serif; /* Modern font */
+}
+
+/* Logo Styling */
+.navbar-logo h2 {
+  color: #dfe6e9; /* Light gray color */
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+/* Navbar links container */
+.navbar-links {
+  display: flex;
+  gap: 40px; /* Space between links */
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Individual nav link */
+.navbar-links li {
+  display: inline;
+}
+
+.nav-link {
+  color: #dfe6e9; /* Light gray text color */
+  text-decoration: none;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  position: relative;
+  transition: color 0.3s ease, border-bottom 0.3s ease;
+}
+
+/* Hover effect */
+.nav-link:hover {
+  color: #00cec9; /* Hover text color */
+}
+
+.nav-link::after {
+  content: "";
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #00cec9; /* Underline effect */
+  transition: width 0.3s;
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+}
+
+.nav-link:hover::after {
+  width: 100%; /* Expanding underline */
+}
+
+/* Responsive Navbar for smaller screens */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .navbar-links li {
+    margin: 5px 0;
+  }
+}
+
+Explanation:
+
+Logo Placement: The logo is aligned to the left, styled with larger font size and letter-spacing to make it look modern and bold.
+
+Link Styles: The navigation links are inline (side by side), with simple text and no button visuals. When hovered, the text changes color, and a thin underline smoothly appears beneath the link for a clean, stylish look.
+
+Hover Effect: A subtle, expanding underline appears when you hover over each link, giving the navigation bar a sophisticated, modern touch.
+
+Responsive Design: On smaller screens, the navigation links stack vertically, making the design adaptive and mobile-friendly.
+
+
+HTML Structure (Example for Navbar.js)
+
+Make sure your navigation bar structure in HTML or React looks something like this:
+
+import React from 'react';
+import { Link } from 'react-router-dom'; // Assuming you're using react-router for navigation
+import './Navbar.css';
+
+function Navbar() {
+  return (
+    <nav className="navbar">
+      <div className="navbar-logo">
+        <h2>MyApp</h2>
+      </div>
+      <ul className="navbar-links">
+        <li>
+          <Link to="/" className="nav-link">Home</Link>
+        </li>
+        <li>
+          <Link to="/transaction-history" className="nav-link">Transaction History</Link>
+        </li>
+        <li>
+          <Link to="/profile" className="nav-link">Profile</Link>
+        </li>
+        <li>
+          <Link to="/logout" className="nav-link">Logout</Link>
+        </li>
+      </ul>
+    </nav>
+  );
+}
+
+export default Navbar;
+
+Additional Notes:
+
+Typography: The Poppins font adds a modern feel. You can link it in your HTML file like this:
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+
+Color Scheme: Dark gray background with light gray text gives the navbar a minimalist, modern feel. You can adjust these colors if you want a different theme.
+
+Hover Interaction: The hover effect with the expanding underline makes the links stand out without requiring buttons or extra styling.
+
+
+This design provides a super cool, clean, and modern look for your navigation bar while ensuring a smooth user experience across devices.
+
+  
+
+
