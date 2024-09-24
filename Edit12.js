@@ -146,4 +146,136 @@ If credentials are valid, they are redirected to /home.
 If credentials are invalid or there’s another issue, the appropriate error message is displayed on the login page.
 
 
+  #-#-#-#--#-#-#-#-#--#-#-#-#-#-#--#-#-#-#-#-#-#-#-#--#-#-#-#-#-#-#-#--#-#-#-#-#-#-
+
+
+
+  Yes, you can retrieve user details from a JWT (JSON Web Token). JWTs typically consist of three parts: a header, a payload, and a signature. The payload contains the claims or data about the user, and this can include information like the user ID, email, roles, etc.
+
+Here's how you can extract the payload (which contains user details) from a JWT on the client side:
+
+Steps to decode JWT and retrieve user details
+
+1. Decode the JWT: Since the JWT is a base64-encoded string, you can decode it to access the payload part.
+
+
+2. Extract user details from the payload: The payload will contain claims, which are key-value pairs representing user details.
+
+
+
+Example Code in React
+
+If you're receiving a JWT upon login and you want to decode it to access user details, you can use a library like jwt-decode or decode it manually using base64.
+
+Option 1: Using jwt-decode Library (Recommended)
+
+You can install the jwt-decode package to make it easy to decode the token.
+
+npm install jwt-decode
+
+Then, in your React component:
+
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import jwt_decode from 'jwt-decode'; // Import jwt-decode to decode JWT
+import './Login.css';
+
+function Login() {
+  const [userID, setUserID] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [userDetails, setUserDetails] = useState(null); // State to store decoded user details
+  const navigate = useNavigate();
+
+  const handleLogin = async () => {
+    if (userID && password) {
+      try {
+        const response = await fetch('http://localhost:8080/api/user/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            userId: userID,
+            password: password,
+          }),
+        });
+
+        const result = await response.text();
+
+        if (result.startsWith('Bearer')) {
+          // Extract the JWT token
+          const token = result.split(' ')[1];
+
+          // Save the token in localStorage
+          localStorage.setItem('authToken', token);
+
+          // Decode the JWT to get user details
+          const decoded = jwt_decode(token);
+
+          // Set the decoded user details in state
+          setUserDetails(decoded);
+
+          console.log('User details:', decoded); // You can view the user details here
+
+          // Redirect to home page
+          navigate('/home');
+        } else {
+          setErrorMessage('Invalid Credentials, Please try again');
+        }
+      } catch (error) {
+        console.error('Error during login:', error);
+        setErrorMessage('An error occurred. Please try again.');
+      }
+    } else {
+      setErrorMessage('Please enter your User ID and Password.');
+    }
+  };
+
+  return (
+    <div className="login-container" id="login">
+      <div className="overlay"></div>
+      <div className="login-box">
+        <h2>Welcome to MoneyFlow</h2>
+        <p>Transfer money securely and easily</p>
+
+        {/* Error message display */}
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
+
+        <div className="input-container">
+          <input
+            type="text"
+            placeholder="User ID"
+            value={userID}
+            onChange={(e) => setUserID(e.target.value)}
+            className="input-field"
+          />
+        </div>
+
+        <div className="input-container">
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="input-field"
+          />
+        </div>
+
+        <button onClick={handleLogin} className="login-btn">
+          Login
+        </button>
+
+        <p className="signup-text" onClick={() => navigate('/register')}>
+          Don't have an account? Sign up here.
+        </p>
+
+        {/* Example showing user details */}
+        {userDetails && (
+          <div className="user-details">
+            <p>Welcome, {userDetails.username}!</
+
+              
+
+
           
