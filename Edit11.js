@@ -653,6 +653,134 @@ Hover Interaction: The hover effect with the expanding underline makes the links
 
 This design provides a super cool, clean, and modern look for your navigation bar while ensuring a smooth user experience across devices.
 
+
+    #-#-#-#-#-#--##+#+-#-#-#-#-#-#-#-#-#-#-#-#--##-№####-#-#-#--#-#-#
+
+
+  Here’s a basic React code for a responsive sticky navigation bar that appears on specific pages. The navbar includes a logo on the left and navigation links to the right. It uses modern CSS styling to ensure a sleek and modern look.
+
+React Component (NavBar.jsx)
+
+import React from 'react';
+import './NavBar.css';
+import { useLocation } from 'react-router-dom';
+
+const NavBar = () => {
+  const location = useLocation();
+
+  // Example paths where navbar should be shown
+  const navPages = ['/home', '/about', '/contact', '/services'];
+
+  // Show the navbar only on specific pages
+  if (!navPages.includes(location.pathname)) {
+    return null;
+  }
+
+  return (
+    <nav className="navbar">
+      <div className="navbar-logo">
+        <h1>YourLogo</h1>
+      </div>
+      <ul className="navbar-links">
+        <li><a href="/home">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/services">Services</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
+    </nav>
+  );
+};
+
+export default NavBar;
+
+CSS (NavBar.css)
+
+/* General styles for the navbar */
+.navbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+  padding: 15px 30px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  font-family: 'Poppins', sans-serif;
+}
+
+.navbar-logo h1 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+}
+
+.navbar-links li {
+  margin: 0;
+}
+
+.navbar-links a {
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  transition: color 0.3s ease;
+}
+
+.navbar-links a:hover {
+  color: #007bff;
+}
+
+/* Responsive styling */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    padding: 10px;
+  }
+
+  .navbar-links {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .navbar-logo h1 {
+    font-size: 22px;
+  }
+}
+
+Key Points:
+
+1. Sticky Navbar: The position: sticky ensures that the navbar sticks to the top when the user scrolls.
+
+
+2. Conditional Rendering: The navbar will only appear on specific pages like /home, /about, /contact, and /services. You can modify the navPages array to fit your route paths.
+
+
+3. Modern Design: The navbar uses a modern, minimalistic font (Poppins, which can be added via Google Fonts). It also includes a subtle shadow for a sleek look.
+
+
+4. Responsive Design: On smaller screens, the layout changes to a column layout, making it mobile-friendly.
+
+
+
+To integrate this into your app:
+
+Make sure you have react-router-dom installed for route management.
+
+Include the Poppins font via Google Fonts in your index.html.
+
+
+Let me know if you need further customization!
+
+
   
 
 
