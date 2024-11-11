@@ -62,3 +62,18 @@ class DatePickerComponent extends Component {
 }
 
 export default DatePickerComponent;
+
+function convertToString(date) {
+    // Check if input is a valid Date object
+    if (!(date instanceof Date) || isNaN(date)) {
+        throw new Error("Invalid Date object");
+    }
+
+    // Extract month, day, and year from the Date object
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is 0-indexed
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+
+    // Format and return as MM/DD/YYYY
+    return `${month}/${day}/${year}`;
+}
