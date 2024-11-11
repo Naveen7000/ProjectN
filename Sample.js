@@ -77,3 +77,38 @@ function convertToString(date) {
     // Format and return as MM/DD/YYYY
     return `${month}/${day}/${year}`;
 }
+
+function convertToString(dateString) {
+    // Split the input date string by '/'
+    const [month, day, year] = dateString.split('/');
+
+    // Validate the date parts
+    if (!month || !day || !year || isNaN(new Date(`${year}-${month}-${day}`))) {
+        throw new Error("Invalid date string");
+    }
+
+    // Ensure month and day are two digits
+    const formattedMonth = month.padStart(2, '0');
+    const formattedDay = day.padStart(2, '0');
+
+    // Return the corrected date format
+    return `${formattedMonth}/${formattedDay}/${year}`;
+}
+
+function convertToString(dateString) {
+    // Parse the input date string into a Date object
+    const date = new Date(dateString);
+
+    // Check if the date is valid
+    if (isNaN(date)) {
+        throw new Error("Invalid date string");
+    }
+
+    // Extract month, day, and year from the Date object
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // getMonth() is 0-indexed
+    const day = String(date.getDate()).padStart(2, '0');
+    const year = date.getFullYear();
+
+    // Format and return as MM/DD/YYYY
+    return `${month}/${day}/${year}`;
+}
