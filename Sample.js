@@ -112,3 +112,24 @@ function convertToString(dateString) {
     // Format and return as MM/DD/YYYY
     return `${month}/${day}/${year}`;
 }
+
+
+function convertToDateObject(dateString) {
+    // Split the input date string by '/'
+    const [month, day, year] = dateString.split('/').map(Number);
+
+    // Validate the date parts
+    if (!month || !day || !year) {
+        throw new Error("Invalid date string");
+    }
+
+    // Create a Date object (month is 0-indexed in JavaScript Date)
+    const date = new Date(year, month - 1, day);
+
+    // Check if the Date object is valid
+    if (isNaN(date)) {
+        throw new Error("Invalid date created");
+    }
+
+    return date;
+}
