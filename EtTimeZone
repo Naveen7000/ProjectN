@@ -1,95 +1,39 @@
-Perfect — you're absolutely right to want this to work regardless of the system's time zone (IST, PT, CET, etc.).
-
-Your Goal:
-
-Accept either a Date object or a string like "mm/dd/yyyy".
-
-Use only the date part from the input.
-
-Use the current time in ET (Eastern Time).
-
-Return a Date object that accurately represents the ET datetime, no matter where the code is run.
-
-
-
----
-
-✅ Final Solution (Time zone safe):
-
 function toEasternTimeWithCustomDate(input) {
-  let dateOnly;
+  // 1. Get the input date (in UTC, ignoring local timezone)
+  let year, month, day;
 
-  // Normalize input to a Date (for date only)
   if (typeof input === 'string') {
-    const [month, day, year] = input.split('/');
-    dateOnly = new Date(Date.UTC(year, month - 1, day)); // Create in UTC to avoid local timezone shift
+    const [mm, dd, yyyy] = input.split('/');
+    year = parseInt(yyyy, 10);
+    month = parseInt(mm, 10) - 1; // JS months are 0-based
+    day = parseInt(dd, 10);
   } else if (input instanceof Date) {
-    dateOnly = new Date(Date.UTC(
-      input.getFullYear(),
-      input.getMonth(),
-      input.getDate()
-    ));
+    year = input.getUTCFullYear();
+    month = input.getUTCMonth();
+    day = input.getUTCDate();
   } else {
-    throw new Error('Input must be a Date object or a mm/dd/yyyy string');
+    throw new Error('Input must be a Date object or mm/dd/yyyy string');
   }
 
-  // Get current ET time parts
+  // 2. Get the current ET time
   const now = new Date();
-  const formatter = new Intl.DateTimeFormat('en-US', {
+  const etFormatter = new Intl.DateTimeFormat('en-US', {
     timeZone: 'America/New_York',
-    hour: 'numeric',
-    minute: 'numeric',
-    second: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
     hour12: false,
   });
 
-  const parts = formatter.formatToParts(now);
-  const get = (type) => parseInt(parts.find((p) => p.type === type)?.value, 10);
+  const parts = Object.fromEntries(
+    etFormatter.formatToParts(now).map(({ type, value }) => [type, value])
+  );
 
-  const hour = get('hour');
-  const minute = get('minute');
-  const second = get('second');
+  const hour = parseInt(parts.hour, 10);
+  const minute = parseInt(parts.minute, 10);
+  const second = parseInt(parts.second, 10);
 
-  // Compose a full UTC Date object that represents the given date + current ET time
-  const utcDate = new Date(Date.UTC(
-    dateOnly.getUTCFullYear(),
-    dateOnly.getUTCMonth(),
-    dateOnly.getUTCDate(),
-    hour,
-    minute,
-    second
-  ));
-
+  // 3. Construct a Date object that represents ET date + ET time in UTC
+  const utcDate = new Date(Date.UTC(year, month, day, hour, minute, second));
   return utcDate;
 }
-
-
----
-
-Why this works in any time zone:
-
-Parsing input date in UTC avoids time zone shifting during construction.
-
-Uses Intl.DateTimeFormat with timeZone: 'America/New_York' to get the true current ET time, regardless of where the code is run (e.g., IST).
-
-Combines the correct ET time with the input date.
-
-Returns a Date object representing the exact intended moment in ET, correctly stored in UTC (standard JS behavior).
-
-
-
----
-
-Example Usage (Anywhere in the world):
-
-const etDate1 = toEasternTimeWithCustomDate("04/17/2025");
-console.log(etDate1.toISOString()); // consistent ET-based result
-
-const etDate2 = toEasternTimeWithCustomDate(new Date("2025-12-31"));
-console.log(etDate2.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-
-
----
-
-Let me know if you want this as a React hook or utility file!
-
