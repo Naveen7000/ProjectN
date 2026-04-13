@@ -1,0 +1,451 @@
+Here's the full content — copy everything between the lines:
+# Error Logging Implementation Guide — React Applications
+
+> **Purpose:** This document is a self-contained context file for an LLM/agent to implement client-side error logging in any React project. Read the full document before writing code. The agent should detect project structure and React version, then apply the correct pattern.
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [How It Works](#how-it-works)
+3. [Project Detection Rules](#project-detection-rules)
+4. [Implementation — Class-Based ErrorBoundary (React < 18 or mixed)](#implementation--class-based-errorboundary)
+5. [Implementation — Functional + Hook Pattern (React 18+)](#implementation--functional--hook-pattern-react-18)
+6. [The Error Logger Service](#the-error-logger-service)
+7. [Integration at App Entry Point](#integration-at-app-entry-point)
+8. [Global Runtime Error Capture](#global-runtime-error-capture)
+9. [API Payload Contract](#api-payload-contract)
+10. [Environment Configuration](#environment-configuration)
+11. [Fallback UI Patterns](#fallback-ui-patterns)
+12. [Agent Execution Checklist](#agent-execution-checklist)
+13. [Anti-Patterns to Avoid](#anti-patterns-to-avoid)
+
+---
+
+## Overview
+
+This system captures **client-side UI errors** in React applications and forwards them to a backend logging API (e.g., Splunk forwarder or a DB logging service). The backend is out of scope for this document.
+
+**What gets captured:**
+
+- React component render errors (via ErrorBoundary)
+- Unhandled Promise rejections
+- Global JavaScript runtime errors
+- Optional: manual logError() calls from anywhere in the app
+
+**What does NOT get captured here:**
+
+- Network/API errors (handle those in your API layer)
+- Backend server errors
+- Build-time errors
+
+---
+
+## How It Works
+
+React Component Tree
+        |
+        | (throws during render / lifecycle)
+        v
+  ErrorBoundary (wraps App or sections)
+        |
+        v
+  errorLoggerService.send(payload)
+        |
+        v
+  POST /api/log/ui-error   <- Backend handles Splunk/DB persistence
+
+Additionally, window.onerror and window.onunhandledrejection catch errors outside the React tree (e.g., async callbacks, setTimeout, third-party scripts).
+
+---
+
+## Project Detection Rules
+
+Agent instruction: Before writing any code, inspect the project and apply the matching pattern.
+
+| Check | Command / File | Decision |
+|---|---|---|
+| React version | package.json -> "react" field | >= 18 -> functional hook pattern preferred |
+| TypeScript | tsconfig.json exists or .tsx files | Use .tsx extensions and type interfaces |
+| Existing ErrorBoundary | Search src/ for componentDidCatch | Extend existing, don't duplicate |
+| Entry point | Look for App.jsx, App.tsx, main.jsx, index.js | Wrap the root component here |
+| Env vars | .env, .env.local | Use REACT_APP_* (CRA) or VITE_* (Vite) prefix |
+| Axios vs Fetch | package.json dependencies | Use matching HTTP client |
+
+---
+
+## Implementation — Class-Based ErrorBoundary
+
+Use this when: React version is < 18, the project already uses class components, or you need componentDidCatch lifecycle explicitly.
+
+File: src/components/ErrorBoundary/ErrorBoundary.jsx (or .tsx)
+
+import React from 'react';
+import { errorLoggerService } from '../../services/errorLoggerService';
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hasError: false,
+      errorId: null,
+    };
+  }
+
+  static getDerivedStateFromError(error) {
+    return {
+      hasError: true,
+      errorId: `err_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    };
+  }
+
+  componentDidCatch(error, info) {
+    const { errorId } = this.state;
+
+    errorLoggerService.send({
+      errorId,
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      componentStack: info?.componentStack,
+      url: window.location.href,
+      userAgent: navigator.userAgent,
+      timestamp: new Date().toISOString(),
+      context: this.props.context ?? 'app-root',
+    });
+  }
+
+  handleReset = () => {
+    this.setState({ hasError: false, errorId: null });
+  };
+
+  render() {
+    if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback({
+          errorId: this.state.errorId,
+          onReset: this.handleReset,
+        });
+      }
+
+      return (
+        <div role="alert" style={styles.container}>
+          <h2 style={styles.title}>Something went wrong</h2>
+          <p style={styles.subtitle}>
+            Our team has been notified. Reference ID: <code>{this.state.errorId}</code>
+          </p>
+          <button onClick={this.handleReset} style={styles.button}>
+            Try again
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+const styles = {
+  container: { padding: '2rem', textAlign: 'center', fontFamily: 'sans-serif' },
+  title: { fontSize: '1.5rem', color: '#c0392b' },
+  subtitle: { color: '#555', margin: '1rem 0' },
+  button: {
+    padding: '0.5rem 1.5rem',
+    cursor: 'pointer',
+    background: '#2c3e50',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '4px',
+  },
+};
+
+export default ErrorBoundary;
+
+
+TypeScript interface (add if using .tsx):
+
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+  context?: string;
+  fallback?: (props: { errorId: string | null; onReset: () => void }) => React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  errorId: string | null;
+}
+
+---
+
+## Implementation — Functional + Hook Pattern (React 18+)
+
+React does not support functional ErrorBoundaries natively. Keep a small class-based boundary but expose a clean functional wrapper hook for manual error logging.
+
+File: src/hooks/useErrorLogger.js
+
+import { useCallback } from 'react';
+import { errorLoggerService } from '../services/errorLoggerService';
+
+export function useErrorLogger({ context = 'unknown' } = {}) {
+  const logError = useCallback(
+    (error, additionalMeta = {}) => {
+      errorLoggerService.send({
+        errorId: `err_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        message: error?.message ?? String(error),
+        name: error?.name ?? 'UnknownError',
+        stack: error?.stack ?? null,
+        componentStack: null,
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        timestamp: new Date().toISOString(),
+        context,
+        ...additionalMeta,
+      });
+    },
+    [context]
+  );
+
+  return { logError };
+}
+
+
+Example usage in an async handler:
+
+function PaymentForm() {
+  const { logError } = useErrorLogger({ context: 'PaymentForm' });
+
+  const handleSubmit = async () => {
+    try {
+      await submitPayment(formData);
+    } catch (err) {
+      logError(err, { orderId: formData.orderId });
+    }
+  };
+}
+
+---
+
+## The Error Logger Service
+
+File: src/services/errorLoggerService.js
+
+const API_ENDPOINT =
+  process.env.REACT_APP_ERROR_LOG_URL ||
+  import.meta.env?.VITE_ERROR_LOG_URL ||
+  '/api/log/ui-error';
+
+const isDev = process.env.NODE_ENV === 'development';
+
+async function send(payload) {
+  if (isDev) {
+    console.group('[ErrorLogger]');
+    console.error('Error captured:', payload.message);
+    console.info('Full payload:', payload);
+    console.groupEnd();
+    return;
+  }
+
+  try {
+    await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      keepalive: true,
+      body: JSON.stringify(payload),
+    });
+  } catch (networkError) {
+    console.warn('[ErrorLogger] Failed to send error log:', networkError.message);
+  }
+}
+
+export const errorLoggerService = { send };
+
+
+Using Axios instead of fetch:
+
+async function send(payload) {
+  if (isDev) { return; }
+  try {
+    await axios.post(API_ENDPOINT, payload, { timeout: 5000 });
+  } catch {
+    // Silent — never throw from logger
+  }
+}
+
+---
+
+## Integration at App Entry Point
+
+Option A — Wrap entire app (recommended)
+
+File: src/App.jsx or src/main.jsx
+
+import React from 'react';
+import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
+import Router from './Router';
+
+function App() {
+  return (
+    <ErrorBoundary context="app-root">
+      <Router />
+    </ErrorBoundary>
+  );
+}
+
+export default App;
+
+
+Option B — Granular boundaries per feature section
+
+function App() {
+  return (
+    <ErrorBoundary context="app-root">
+      <Header />
+      <ErrorBoundary context="main-content" fallback={ContentFallback}>
+        <MainContent />
+      </ErrorBoundary>
+      <ErrorBoundary context="sidebar">
+        <Sidebar />
+      </ErrorBoundary>
+    </ErrorBoundary>
+  );
+}
+
+---
+
+## Global Runtime Error Capture
+
+File: src/index.js or src/main.jsx
+
+import { errorLoggerService } from './services/errorLoggerService';
+
+window.onerror = function (message, source, lineno, colno, error) {
+  errorLoggerService.send({
+    errorId: `err_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    message: error?.message ?? String(message),
+    name: error?.name ?? 'GlobalError',
+    stack: error?.stack ?? `${source}:${lineno}:${colno}`,
+    componentStack: null,
+    url: window.location.href,
+    userAgent: navigator.userAgent,
+    timestamp: new Date().toISOString(),
+    context: 'window.onerror',
+  });
+  return false;
+};
+
+window.addEventListener('unhandledrejection', (event) => {
+  const error = event.reason;
+
+  errorLoggerService.send({
+    errorId: `err_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+    message: error?.message ?? String(error),
+    name: error?.name ?? 'UnhandledRejection',
+    stack: error?.stack ?? null,
+    componentStack: null,
+    url: window.location.href,
+    userAgent: navigator.userAgent,
+    timestamp: new Date().toISOString(),
+    context: 'unhandledrejection',
+  });
+});
+
+---
+
+## API Payload Contract
+
+interface ErrorPayload {
+  errorId: string;
+  message: string;
+  name: string;
+  stack: string | null;
+  componentStack: string | null;
+  url: string;
+  userAgent: string;
+  timestamp: string;
+  context: string;
+  userId?: string;
+  sessionId?: string;
+  appVersion?: string;
+}
+
+Example payload:
+
+{
+  "errorId": "err_1713001200000_x9k2m1",
+  "message": "Cannot read properties of undefined (reading 'map')",
+  "name": "TypeError",
+  "stack": "TypeError: Cannot read properties...\n    at ProductList (ProductList.jsx:34:18)",
+  "componentStack": "\n    in ProductList\n    in MainContent\n    in App",
+  "url": "https://app.example.com/products",
+  "userAgent": "Mozilla/5.0 ...",
+  "timestamp": "2026-04-13T18:14:00.000Z",
+  "context": "main-content"
+}
+
+---
+
+## Environment Configuration
+
+Create React App (.env):
+REACT_APP_ERROR_LOG_URL=https://your-backend.example.com/api/log/ui-error
+
+Vite (.env):
+VITE_ERROR_LOG_URL=https://your-backend.example.com/api/log/ui-error
+
+Note: Never put API secrets or auth tokens in frontend env vars.
+
+---
+
+## Fallback UI Patterns
+
+Custom Fallback Component:
+
+function MyFallback({ errorId, onReset }) {
+  return (
+    <div className="error-page">
+      <h1>Oops! Something broke.</h1>
+      <p>Error reference: <strong>{errorId}</strong></p>
+      <button onClick={onReset}>Reload section</button>
+      <a href="/">Go to homepage</a>
+    </div>
+  );
+}
+
+Inline (for non-critical components):
+
+<ErrorBoundary fallback={() => <span style={{ color: 'gray' }}>Widget unavailable</span>}>
+  <RecommendationWidget />
+</ErrorBoundary>
+
+---
+
+## Agent Execution Checklist
+
+1. Detect project structure (React version, TypeScript, existing ErrorBoundary, entry point, env var convention)
+2. Create src/services/errorLoggerService.js
+3. Create src/components/ErrorBoundary/ErrorBoundary.jsx
+4. (React 18+ / async) Create src/hooks/useErrorLogger.js
+5. Wrap root in App.jsx with <ErrorBoundary context="app-root">
+6. Add global handlers in index.js (window.onerror + unhandledrejection)
+7. Add env var to .env
+8. Test — throw a test error and verify console output in dev mode
+9. Remove test error
+10. Share API payload contract with backend team
+
+---
+
+## Anti-Patterns to Avoid
+
+- throw inside componentDidCatch -> never throw in the catch handler (infinite loop)
+- console.error as the only logging -> always send to backend in production
+- Showing stack traces to end users -> show only errorId to user
+- Blocking render while logging -> use fire-and-forget async with silent catch
+- Single boundary at root only -> use granular boundaries for isolated fallbacks
+- Logging PII in error messages -> sanitize before sending
+- Hard-coding the log URL -> always use environment variables
+
+---
+
+Document version: 1.0 — UI Error Logging | Backend logging API (Splunk / DB) is out of scope.
+To save in VS Code: create a new file, name it ERROR_LOGGING_IMPLEMENTATION.md (or .txt), paste the content, and save. Done!
